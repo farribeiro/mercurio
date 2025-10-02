@@ -1,5 +1,9 @@
 
+-- ethereal schematic path
+
 local epath = minetest.get_modpath("ethereal") .. "/schematics/"
+
+-- add schematics
 
 lucky_block:add_schematics({
 	{"pinetree", ethereal.pinetree, {x = 3, y = 0, z = 3}},
@@ -7,8 +11,14 @@ lucky_block:add_schematics({
 	{"bananatree", ethereal.bananatree, {x = 3, y = 0, z = 3}},
 	{"orangetree", ethereal.orangetree, {x = 2, y = 0, z = 2}},
 	{"birchtree", ethereal.birchtree, {x = 2, y = 0, z = 2}},
-	{"basandrabush", ethereal.basandrabush, {x = 1, y = 0, z = 1}}
+	{"basandrabush", ethereal.basandrabush, {x = 1, y = 0, z = 1}},
+	{"mushroomone", ethereal.mushroomone, {x = 4, y = 0, z = 4}},
+	{"mushroomtwo", ethereal.mushroomtwo, {x = 1, y = 0, z = 1}},
+	{"underspike", ethereal.desertstone_under_spike, {x = 1, y = 0, z = 1}},
+	{"ethereal_pond", ethereal.pond, {x = 6, y = 2, z = 7}}
 })
+
+-- add lucky blocks
 
 lucky_block:add_blocks({
 	{"sch", "basandrabush", 0, false},
@@ -32,6 +42,7 @@ lucky_block:add_blocks({
 	{"dro", {"ethereal:willow_sapling"} ,5},
 	{"dro", {"ethereal:mushroom_sapling"} ,5},
 	{"dro", {"ethereal:palm_sapling"} ,5},
+	{"sch", "mushroomone", 0, false},
 	{"dro", {"ethereal:flight_potion"}, 1},
 	{"dro", {"ethereal:birch_sapling"} ,5},
 	{"dro", {"ethereal:redwood_sapling"} ,1},
@@ -42,6 +53,7 @@ lucky_block:add_blocks({
 	{"dro", {"ethereal:cold_dirt"}, 10},
 	{"dro", {"ethereal:mushroom_dirt"}, 10},
 	{"dro", {"ethereal:fiery_dirt"}, 10},
+	{"sch", "mushroomtwo", 0, false},
 	{"dro", {"ethereal:axe_crystal"}},
 	{"nod", "ethereal:fire_flower", 1},
 	{"dro", {"ethereal:sword_crystal"}},
@@ -52,6 +64,7 @@ lucky_block:add_blocks({
 	{"dro", {"ethereal:shovel_crystal"}},
 	{"dro", {"ethereal:fishing_rod_baited"}},
 	{"exp"},
+	{"sch", "underspike", 0, false},
 	{"dro", {"ethereal:fire_dust"}, 2},
 	{"exp", 4},
 	{"dro", {"ethereal:crystal_gilly_staff"}},
@@ -64,6 +77,7 @@ lucky_block:add_blocks({
 		{name = "ethereal:bamboo_sprout", max = 10},
 		{name = "ethereal:banana_tree_sapling", max = 10},
 		{name = "ethereal:mushroom_sapling", max = 10},
+		{name = "ethereal:mushroom_brown_sapling", max = 10},
 		{name = "ethereal:frost_tree_sapling", max = 10},
 		{name = "ethereal:sakura_sapling", max = 10},
 		{name = "ethereal:willow_sapling", max = 10},
@@ -136,6 +150,48 @@ lucky_block:add_blocks({
 		{name = "ethereal:sushi_nigiri", max = 1},
 		{name = "ethereal:sushi_kappamaki", max = 1},
 		{name = "ethereal:hearty_stew", max = 1},
+	}},
+	{"sch", "ethereal_pond", 0, false},
+	{"sch", "ethereal_pond", 0, false, {
+		{"default:river_water_source", "default:lava_source"},
+		{"default:clay", "default:stone"},
+		{"default:dirt", "ethereal:fiery_dirt"},
+		{"default:mossycobble", "default:obsidian"},
+		{"ethereal:bush2", "ethereal:basandra_bush_leaves"},
+		{"default:fern_1", "ethereal:dry_shrub"},
+		{"default:fern_2", "ethereal:dry_shrub"},
+		{"default:fern_3", "ethereal:fire_flower"},
+		{"default:grass_4", "ethereal:dry_shrub"}
+	}},
+	{"sch", "ethereal_pond", 0, false, {
+		{"default:clay", "default:dirt"},
+		{"default:dirt", "default:dry_dirt_with_dry_grass"},
+		{"default:mossycobble", "default:dry_dirt"},
+		{"ethereal:bush2", "default:acacia_bush_leaves"},
+		{"default:fern_1", "default:dry_grass_1"},
+		{"default:fern_2", "default:dry_grass_2"},
+		{"default:fern_3", "default:dry_grass_3"},
+		{"default:grass_4", "default:dry_grass_4"}
+	}},
+	{"sch", "ethereal_pond", 0, false, {
+		{"default:river_water_source", "default:water_source"},
+		{"default:dirt", "default:sand"},
+		{"default:mossycobble", "default:dirt"},
+		{"ethereal:bush2", "default:pine_bush_needles"},
+		{"default:fern_1", "default:marram_grass_1"},
+		{"default:fern_2", "default:marram_grass_2"},
+		{"default:fern_3", "default:marram_grass_3"},
+		{"default:grass_4", "default:dry_shrub"}
+	}},
+		{"sch", "ethereal_pond", 0, false, {
+		{"default:river_water_source", "default:water_source"},
+		{"default:dirt", "default:coral_brown"},
+		{"default:mossycobble", "default:coral_orange"},
+		{"ethereal:bush2", "default:coral_skeleton"},
+		{"default:fern_1", "ethereal:coral2"},
+		{"default:fern_2", "ethereal:coral3"},
+		{"default:fern_3", "ethereal:coral4"},
+		{"default:grass_4", "ethereal:seaweed"}
 	}}
 })
 

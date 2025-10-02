@@ -6,9 +6,11 @@
 	Updated by TenPlus1
 ]]
 
+-- global
 
-ethereal = {version = "20240125"}
+ethereal = {version = "20241014"}
 
+-- setting helper
 
 local function setting(stype, name, default)
 
@@ -22,13 +24,10 @@ local function setting(stype, name, default)
 		value = tonumber(minetest.settings:get("ethereal." .. name))
 	end
 
-	if value == nil then
-		value = default
-	end
+	if value == nil then value = default end
 
 	ethereal[name] = value
 end
-
 
 -- DO NOT change settings below, use the settings.conf file instead
 
@@ -43,59 +42,82 @@ setting("bool", "flight", true)
 setting("number", "glacier", 1)
 setting("number", "bamboo", 1)
 setting("number", "mesa", 1)
-setting("number", "alpine", 1)
-setting("number", "healing", 1)
-setting("number", "snowy", 1)
+setting("number", "alpine", 1)--taiga
+setting("number", "snowy", 1)--coniferous_forest
 setting("number", "frost", 1)
-setting("number", "grassy", 1)
+setting("number", "grassy", 1)--deciduous_forest
 setting("number", "caves", 1)
 setting("number", "grayness", 1)
 setting("number", "grassytwo", 1)
 setting("number", "prairie", 1)
 setting("number", "jumble", 1)
-setting("number", "junglee", 1)
+setting("number", "junglee", 1)--rainforest
 setting("number", "desert", 1)
 setting("number", "grove", 1)
 setting("number", "mushroom", 1)
-setting("number", "sandstone", 1)
-setting("number", "quicksand", 1)
+setting("number", "sandstone", 1)--sandstone_desert
 setting("number", "plains", 1)
 setting("number", "savanna", 1)
 setting("number", "fiery", 1)
-setting("number", "sandclay", 1)
 setting("number", "swamp", 1)
-setting("number", "sealife", 1)
-setting("number", "reefs", 1)
-setting("number", "sakura", 1)
+setting("number", "quicksand", 1)--swamp quicksand
 setting("number", "tundra", 1)
 setting("number", "mediterranean", 1)
+setting("number", "cold_desert", 1)
+setting("number", "snowy_grassland", 1)
+setting("number", "sealife", 1)
+setting("number", "reefs", 1)
 setting("number", "logs", 1)
+setting("bool", "wood_rotate", true)
 
 
 local path = minetest.get_modpath("ethereal")
 
--- Load settings.conf file if found
+-- Load settings.conf file if found [DEPRECATED]
+
 local input = io.open(path.."/settings.conf", "r")
 
 if input then
-	dofile(path .. "/settings.conf")
-	input:close()
-	input = nil
+	dofile(path .. "/settings.conf") ; input:close() ; input = nil
 end
 
-
--- Translation support
-ethereal.translate = minetest.get_translator("ethereal")
-
 -- Falling node function
+
 ethereal.check_falling = minetest.check_for_falling or nodeupdate
 
 -- creative check
+
 local creative_mode_cache = minetest.settings:get_bool("creative_mode")
+
 function ethereal.check_creative(name)
 	return creative_mode_cache or minetest.check_player_privs(name, {creative = true})
 end
 
+-- helper function to add {eatable} group to food items
+
+function ethereal.add_eatable(item, hp)
+
+	local def = minetest.registered_items[item]
+
+	if def then
+
+		local groups = table.copy(def.groups) or {}
+
+		groups.eatable = hp ; groups.flammable = 2
+
+		minetest.override_item(item, {groups = groups})
+	end
+end
+
+-- strawberry check and load
+
+if minetest.get_modpath("farming") and farming.mod and farming.mod == "redo" then
+	-- farming redo already has strawberry included
+else
+	dofile(path .. "/strawberry.lua")
+end
+
+-- load mod sections
 
 dofile(path .. "/plantlife.lua")
 dofile(path .. "/onion.lua")
@@ -106,7 +128,6 @@ dofile(path .. "/food.lua")
 dofile(path .. "/wood.lua")
 dofile(path .. "/leaves.lua")
 dofile(path .. "/sapling.lua")
-dofile(path .. "/strawberry.lua")
 dofile(path .. "/fishing.lua")
 dofile(path .. "/extra.lua")
 dofile(path .. "/sealife.lua")
@@ -124,16 +145,19 @@ dofile(path .. "/compatibility.lua")
 dofile(path .. "/stairs.lua")
 
 -- add flight if enabled
+
 if ethereal.flight then
 	dofile(path .. "/flight.lua")
 end
 
 -- add lucky blocks if mod active
+
 if minetest.get_modpath("lucky_block") then
 	dofile(path .. "/lucky_block.lua")
 end
 
 -- Set bonemeal aliases
+
 if minetest.get_modpath("bonemeal") then
 	minetest.register_alias("ethereal:bone", "bonemeal:bone")
 	minetest.register_alias("ethereal:bonemeal", "bonemeal:bonemeal")
@@ -142,9 +166,10 @@ else -- or return to where it came from
 	minetest.register_alias("ethereal:bonemeal", "default:dirt")
 end
 
-if minetest.get_modpath("xanadu") then
-	dofile(path .. "/plantpack.lua")
-end
+-- ambience lite
 
+if minetest.get_modpath("ambience") then
+	dofile(path .. "/ambience.lua")
+end
 
 print ("[MOD] Ethereal loaded")

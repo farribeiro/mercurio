@@ -34,7 +34,7 @@ for _, t in ipairs(leg_materials) do
 		inventory_image = "homedecor_table_legs_"..name..".png",
 		wield_image = "homedecor_table_legs_"..name..".png",
 		walkable = false,
-		use_texture_alpha = "blend",
+		use_texture_alpha = "clip",
 		groups = {snappy=3, dig_tree=2},
 		_sound_def = {
 			key = "node_sound_wood_defaults",
@@ -74,12 +74,12 @@ for i, mat in ipairs(tabletop_materials) do
 			tiles = {
 				'homedecor_'..m..'_table_'..shape..'.png',
 				'homedecor_'..m..'_table_edges.png',
-				'homedecor_blanktile.png',
-				'homedecor_blanktile.png',
-				'homedecor_blanktile.png',
+				'blank.png',
+				'blank.png',
+				'blank.png',
 			},
 			wield_image = 'homedecor_'..m..'_table_'..shape..'_inv.png',
-			use_texture_alpha = "blend",
+			use_texture_alpha = "clip",
 			groups = { snappy = 3, dig_tree=2 },
 			_sound_def = {
 				key = s,
@@ -111,13 +111,13 @@ for i, mat in ipairs(tabletop_materials) do
 				description = string.format("%s %s table with %s legs", shape, m, leg_mat),
 				mesh = "homedecor_table_"..shape..".obj",
 				tiles = {
-					'homedecor_blanktile.png',
-					'homedecor_blanktile.png',
+					'blank.png',
+					'blank.png',
 					'homedecor_'..m..'_table_'..shape..'.png',
 					'homedecor_'..m..'_table_edges.png',
 					"homedecor_table_legs_"..leg_mat..".png",
 				},
-				use_texture_alpha = "blend",
+				use_texture_alpha = "clip",
 				groups = { snappy = 3, dig_tree=2 },
 				_sound_def = {
 					key = s

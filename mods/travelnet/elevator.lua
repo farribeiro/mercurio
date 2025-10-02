@@ -96,6 +96,7 @@ minetest.register_node("travelnet:elevator", {
 	tiles = travelnet.tiles_elevator,
 
 	inventory_image = travelnet.elevator_inventory_image,
+	is_ground_content = false,
 	groups = {
 		elevator = 1
 	},
@@ -150,6 +151,10 @@ minetest.register_node("travelnet:elevator", {
 		end
 	end
 })
+
+if minetest.get_modpath("mesecons_mvps") then
+	mesecon.register_mvps_stopper("travelnet:elevator")
+end
 
 minetest.register_craft({
 	output = "travelnet:elevator",

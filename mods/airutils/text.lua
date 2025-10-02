@@ -58,20 +58,20 @@ local function clamp_characters(text, max_lenght)
     local c = ""
     for i = 1, #new_string, 1 do
         c = string.sub(new_string,i,i)
-        if not (c == control_char) then
+        if c ~= control_char then
             count = count + 1
         end
         curr_index = i
         if count == max_lenght then break end
     end
     local cutstring = string.sub(new_string,1,curr_index)
-    
+
     --now reconstruct the string
     local outputstring = ""
     local control_order_curr_intex = 0
     for i = 1, #cutstring, 1 do
         c = string.sub(cutstring,i,i)
-        if not (c == control_char) then
+        if c ~= control_char then
             outputstring = outputstring .. (c or "")
         else
             control_order_curr_intex = control_order_curr_intex + 1
@@ -92,10 +92,10 @@ local function file_exists(name, return_handle, mode)
 		if (return_handle) then
 			return f
 		end
-		io.close(f) 
-		return true 
-	else 
-		return false 
+		io.close(f)
+		return true
+	else
+		return false
 	end
 end
 
@@ -217,7 +217,7 @@ local function make_text_texture(text, default_color, line_width, line_height, c
 			table.insert(texture, (":%d,%d=%s"):format(xpos + ch.off, ypos, ch.tex))
 		end
 		table.insert(
-			texture, 
+			texture,
 			(":%d,%d="):format(xpos + word.w, ypos) .. char_tex(font_name, " ")
 		)
 		xpos = xpos + word.w + cwidth_tab[" "]
@@ -234,33 +234,42 @@ function airutils.convert_text_to_texture(text, default_color, horizontal_aligme
     text = text or ""
     default_color = default_color or 0
     horizontal_aligment = horizontal_aligment or 3
-	local font_size
-	local line_width
-	local line_height
-	local char_width
-	local colorbgw
-    local chars_per_line
-	local widemult
+    if not signs_lib then return "" end
+	local font_size = 16
+	local line_width = 1
+	local line_height = 1
+	local char_width = 1
+	local colorbgw = ""
+    local chars_per_line = 21
+	local widemult = 0.5
     local count = 0
     --text = string.sub(text,1,max_lenght)
     text, count = clamp_characters(text, max_lenght)
 
     if count <= 10 then
-        widemult = 0.75
-	    font_size = 32
-        chars_per_line = 10
-	    line_width = math.floor(signs_lib.avgwidth32 * chars_per_line) * (horizontal_aligment * widemult)
-	    line_height = signs_lib.lineheight32
-	    char_width = signs_lib.charwidth32
-	    colorbgw = signs_lib.colorbgw32
+        if signs_lib.avgwidth32 then
+            widemult = 0.75
+	        font_size = 32
+            chars_per_line = 10
+	        line_width = math.floor(signs_lib.avgwidth32 * chars_per_line) * (horizontal_aligment * widemult)
+	        line_height = signs_lib.lineheight32
+	        char_width = signs_lib.charwidth32
+	        colorbgw = signs_lib.colorbgw32
+        else
+            return ""
+        end
     else
-        widemult = 0.5
-	    font_size = 16
-        chars_per_line = 21
-	    line_width = math.floor(signs_lib.avgwidth16 * chars_per_line) * (horizontal_aligment * widemult)
-	    line_height = signs_lib.lineheight16
-	    char_width = signs_lib.charwidth16
-	    colorbgw = signs_lib.colorbgw16
+        if signs_lib.avgwidth16 then
+            widemult = 0.5
+	        font_size = 16
+            chars_per_line = 21
+	        line_width = math.floor(signs_lib.avgwidth16 * chars_per_line) * (horizontal_aligment * widemult)
+	        line_height = signs_lib.lineheight16
+	        char_width = signs_lib.charwidth16
+	        colorbgw = signs_lib.colorbgw16
+        else
+            return ""
+        end
     end
 
 	local texture = { ("[combine:%dx%d"):format(line_width, line_height) }

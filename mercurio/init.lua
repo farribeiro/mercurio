@@ -259,4 +259,25 @@ dofile(path .. "/admin.lua")
 -- Unified Inventory Monkey Patch
 dofile(path .. "/inventory.lua")
 
+-- Monkey patches
+dofile(path .. "/patches.lua")
+dofile(path .. "/xdecor.lua")
+
+-- Visuals
+core.register_on_joinplayer(function(player, last_login)
+    player:set_lighting({
+        volumetric_light = {
+            strength = 0.1,
+        },
+        shadows = {
+            intensity = 1,
+            tint = {r=0, g=0, b=0},
+        },
+        bloom = {
+            intensity = 0.1,
+        }
+    })
+end)
+
 log_action("Server overrides loaded!")
+

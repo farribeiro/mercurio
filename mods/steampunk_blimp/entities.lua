@@ -8,7 +8,7 @@ local LATER_DRAG_FACTOR = 2.0
 -- entity
 --
 
-minetest.register_entity('steampunk_blimp:fire',{
+core.register_entity('steampunk_blimp:fire',{
 initial_properties = {
 	physical = false,
 	collide_with_objects=false,
@@ -22,13 +22,13 @@ initial_properties = {
 	},
 
     on_activate = function(self,std)
-	    self.sdata = minetest.deserialize(std) or {}
+	    self.sdata = core.deserialize(std) or {}
 	    if self.sdata.remove then self.object:remove() end
     end,
 
     get_staticdata=function(self)
       self.sdata.remove=true
-      return minetest.serialize(self.sdata)
+      return core.serialize(self.sdata)
     end,
 
 })
@@ -36,7 +36,7 @@ initial_properties = {
 --
 -- seat pivot
 --
-minetest.register_entity('steampunk_blimp:stand_base',{
+core.register_entity('steampunk_blimp:stand_base',{
     initial_properties = {
 	    physical = false,
 	    collide_with_objects=false,
@@ -49,17 +49,17 @@ minetest.register_entity('steampunk_blimp:stand_base',{
     dist_moved = 0,
 
     on_activate = function(self,std)
-	    self.sdata = minetest.deserialize(std) or {}
+	    self.sdata = core.deserialize(std) or {}
 	    if self.sdata.remove then self.object:remove() end
     end,
 
     get_staticdata=function(self)
       self.sdata.remove=true
-      return minetest.serialize(self.sdata)
+      return core.serialize(self.sdata)
     end,
 })
 
-minetest.register_entity("steampunk_blimp:blimp", {
+core.register_entity("steampunk_blimp:blimp", {
     initial_properties = {
         physical = true,
         collide_with_objects = true, --true,
@@ -114,7 +114,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
     item = "steampunk_blimp:blimp",
 
     get_staticdata = function(self) -- unloaded/unloads ... is now saved
-        return minetest.serialize({
+        return core.serialize({
             stored_baloon_buoyancy = self._baloon_buoyancy,
             stored_energy = self._energy,
             stored_water_level = self._water_level,
@@ -132,19 +132,22 @@ minetest.register_entity("steampunk_blimp:blimp", {
             stored_passengers = self._passengers, --passengers list
             stored_passengers_locked = self._passengers_locked,
             stored_ship_name = self._ship_name,
+            remove = self._remove or false,
         })
     end,
 
 	on_deactivate = function(self)
-        airutils.save_inventory(self)
-        if self.sound_handle then minetest.sound_stop(self.sound_handle) end
-        if self.sound_handle_pistons then minetest.sound_stop(self.sound_handle_pistons) end
+        if self._remove ~= true then
+            airutils.save_inventory(self)
+        end
+        if self.sound_handle then core.sound_stop(self.sound_handle) end
+        if self.sound_handle_pistons then core.sound_stop(self.sound_handle_pistons) end
 	end,
 
     on_activate = function(self, staticdata, dtime_s)
-        --minetest.chat_send_all('passengers: '.. dump(self._passengers))
+        --core.chat_send_all('passengers: '.. dump(self._passengers))
         if staticdata ~= "" and staticdata ~= nil then
-            local data = minetest.deserialize(staticdata) or {}
+            local data = core.deserialize(staticdata) or {}
 
             self._baloon_buoyancy = data.stored_baloon_buoyancy or 0
             self._energy = data.stored_energy or 0
@@ -152,7 +155,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
             self._boiler_pressure = data.stored_boiler_pressure or 0
             self.owner = data.stored_owner or ""
             self._shared_owners = data.stored_shared_owners or {}
-            self.hp = data.stored_hp or 50
+            self.hp = 50 --data.stored_hp or 50
             self.color = data.stored_color or "blue"
             self.color2 = data.stored_color2 or "white"
             self.logo = data.stored_logo or "steampunk_blimp_alpha_logo.png"
@@ -160,14 +163,23 @@ minetest.register_entity("steampunk_blimp:blimp", {
             self.buoyancy = data.stored_buoyancy or 0.15
             self.hull_integrity = data.stored_hull_integrity
             self.item = data.stored_item
-            self._inv_id = data.stored_inv_id
             self._passengers = data.stored_passengers or steampunk_blimp.copy_vector({[1]=nil, [2]=nil, [3]=nil, [4]=nil, [5]=nil, [6]=nil, [7]=nil})
             self._passengers_locked = data.stored_passengers_locked
             self._ship_name = data.stored_ship_name
-            --minetest.debug("loaded: ", self._energy)
+            self._remove = data.remove or false
+            if self._remove ~= true then
+                self._inv_id = data.stored_inv_id
+            end
+            --core.debug("loaded: ", self._energy)
             local properties = self.object:get_properties()
             properties.infotext = data.stored_owner .. " nice blimp"
             self.object:set_properties(properties)
+
+            if self._remove == true then
+                airutils.destroy_inventory(self)
+                self.object:remove()
+                return
+            end
         end
 
         local colstr = steampunk_blimp.colors[self.color]
@@ -179,7 +191,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
         steampunk_blimp.paint2(self, self.color2)
         local pos = self.object:get_pos()
 
-        local fire=minetest.add_entity(pos,'steampunk_blimp:fire')
+        local fire=core.add_entity(pos,'steampunk_blimp:fire')
         fire:set_attach(self.object,'',{x=0.0,y=0.0,z=0.0},{x=0,y=0,z=0})
 	    self.fire = fire
 
@@ -191,7 +203,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
         do
             self._passenger_is_sit[i] = 0
             self._passengers_base_pos[i] = steampunk_blimp.copy_vector(steampunk_blimp.passenger_pos[i])
-            self._passengers_base[i]=minetest.add_entity(pos,'steampunk_blimp:stand_base')
+            self._passengers_base[i]=core.add_entity(pos,'steampunk_blimp:stand_base')
             self._passengers_base[i]:set_attach(self.object,'',self._passengers_base_pos[i],{x=0,y=0,z=0})
         end
 
@@ -206,12 +218,14 @@ minetest.register_entity("steampunk_blimp:blimp", {
 
         self.object:set_armor_groups({immortal=1})
 
-		local inv = minetest.get_inventory({type = "detached", name = self._inv_id})
-		-- if the game was closed the inventories have to be made anew, instead of just reattached
-		if not inv then
-            airutils.create_inventory(self, steampunk_blimp.trunk_slots)
-		else
-		    self.inv = inv
+        if self._remove ~= true then
+		    local inv = core.get_inventory({type = "detached", name = self._inv_id})
+		    -- if the game was closed the inventories have to be made anew, instead of just reattached
+		    if not inv then
+                airutils.create_inventory(self, steampunk_blimp.trunk_slots)
+		    else
+		        self.inv = inv
+            end
         end
 
         steampunk_blimp.engine_step(self, 0)
@@ -253,7 +267,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
         local newyaw
         local newpitch
 
-        local hull_direction = minetest.yaw_to_dir(yaw)
+        local hull_direction = core.yaw_to_dir(yaw)
         local nhdir = {x=hull_direction.z,y=0,z=-hull_direction.x}        -- lateral unit vector
         local velocity = self.object:get_velocity()
         local wind_speed = airutils.get_wind(curr_pos, 0.15)
@@ -281,7 +295,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
         --fire
         if self.fire then
             if self._engine_running == true then
-                self.fire:set_properties({textures={"default_furnace_fire_fg.png"},glow=15})
+                self.fire:set_properties({textures={steampunk_blimp.fire_tex},glow=15})
             else
                 self.fire:set_properties({textures={"steampunk_blimp_alpha.png"},glow=0})
             end
@@ -303,7 +317,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
 
         --roll adjust
         ---------------------------------
-        local sdir = minetest.yaw_to_dir(newyaw)
+        local sdir = core.yaw_to_dir(newyaw)
         local snormal = {x=sdir.z,y=0,z=-sdir.x}    -- rightside, dot is negative
         local prsr = steampunk_blimp.dot(snormal,nhdir)
         local rollfactor = -15
@@ -339,13 +353,13 @@ minetest.register_entity("steampunk_blimp:blimp", {
             end
             self._last_roll = newroll
         end
-        --minetest.chat_send_all('newroll: '.. newroll)
+        --core.chat_send_all('newroll: '.. newroll)
         ---------------------------------
         -- end roll
 
         if steampunk_blimp.wind_enabled then
-            --local wind_yaw = minetest.dir_to_yaw(wind_speed)
-            --minetest.chat_send_all("x: "..wind_speed.x.. " - z: "..wind_speed.z.." - yaw: "..math.deg(wind_yaw).. " - orig: "..wind_yaw)
+            --local wind_yaw = core.dir_to_yaw(wind_speed)
+            --core.chat_send_all("x: "..wind_speed.x.. " - z: "..wind_speed.z.." - yaw: "..math.deg(wind_yaw).. " - orig: "..wind_yaw)
 
             if self.anchored == false and self.isonground == false then
                 accel = vector.add(accel, wind_speed)
@@ -360,10 +374,16 @@ minetest.register_entity("steampunk_blimp:blimp", {
         self.object:add_velocity(vector.multiply(accel,self.dtime))
         self.object:set_rotation({x=newpitch,y=newyaw,z=newroll})
 
+        local compass_angle = newyaw
+        local rem_obj = self.object:get_attach()
+        if rem_obj then
+            compass_angle = rem_obj:get_rotation().y
+        end
+
         self.object:set_bone_position("low_rudder", {x=0,y=0,z=0}, {x=0,y=self._rudder_angle,z=0})
         self.object:set_bone_position("rudder", {x=0,y=97,z=-148}, {x=0,y=self._rudder_angle,z=0})
         self.object:set_bone_position("timao", {x=0,y=27,z=-25}, {x=0,y=0,z=self._rudder_angle*8})
-        self.object:set_bone_position("compass_axis", {x=0,y=30.2,z=-21.243}, {x=0, y=(math.deg(newyaw)), z=0})
+        self.object:set_bone_position("compass_axis", {x=0,y=30.2,z=-21.243}, {x=0, y=(math.deg(compass_angle)), z=0})
 
         --saves last velocy for collision detection (abrupt stop)
         self._last_vel = self.object:get_velocity()
@@ -377,7 +397,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
             return
         end
         local is_admin
-        is_admin = minetest.check_player_privs(puncher, {server=true})
+        is_admin = core.check_player_privs(puncher, {server=true})
 		local name = puncher:get_player_name()
         if self.owner == nil then
             self.owner = name
@@ -388,6 +408,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
         local itmstck=puncher:get_wielded_item()
         local item_name = ""
         if itmstck then item_name = itmstck:get_name() end
+        --core.chat_send_all(item_name)
 
         if is_attached == true then
             --refuel
@@ -406,14 +427,23 @@ minetest.register_entity("steampunk_blimp:blimp", {
 
         -- deal with painting or destroying
         if itmstck then
-            local _,indx = item_name:find('dye:')
+            --core.chat_send_all(dump(item_name))
+            local find_str = 'dye:'
+            if airutils.is_mcl and not core.get_modpath("mcl_playerplus") then
+                --mineclonia
+                find_str = 'mcl_dyes:'
+            end
+            local _,indx = item_name:find(find_str)
             if indx then
 
                 --lets paint!!!!
-                local color = item_name:sub(indx+1)
+                local color = nil
+                if not airutils.is_repixture then
+                    color = item_name:sub(indx+1)
+                end
                 local colstr = steampunk_blimp.colors[color]
-                --minetest.chat_send_all(color ..' '.. dump(colstr))
-                if colstr and (name == self.owner or minetest.check_player_privs(puncher, {protection_bypass=true})) then
+                --core.chat_send_all(color ..' '.. dump(colstr))
+                if colstr and (name == self.owner or core.check_player_privs(puncher, {protection_bypass=true})) then
                     local ctrl = puncher:get_player_control()
                     if ctrl.aux1 then
                         steampunk_blimp.paint2(self, colstr)
@@ -441,16 +471,12 @@ minetest.register_entity("steampunk_blimp:blimp", {
             if not has_passengers and toolcaps and toolcaps.damage_groups and
                     toolcaps.groupcaps and (toolcaps.groupcaps.choppy or toolcaps.groupcaps.axey_dig) then
 
-                local is_empty = true --[[false
-                local inventory = airutils.get_inventory(self)
-                if inventory then
-                    if inventory:is_empty("main") then is_empty = true end
-                end]]--
+                local is_empty = true
 
                 --airutils.make_sound(self,'hit')
                 if is_empty == true then
                     self.hp = self.hp - 10
-                    minetest.sound_play("steampunk_blimp_collision", {
+                    core.sound_play("steampunk_blimp_collision", {
                         object = self.object,
                         max_hear_distance = 5,
                         gain = 1.0,
@@ -479,7 +505,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
             self.owner = name
         end
 
-        --minetest.chat_send_all('passengers: '.. dump(self._passengers))
+        --core.chat_send_all('passengers: '.. dump(self._passengers))
         --=========================
         --  form to pilot
         --=========================
@@ -515,7 +541,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
             local pass_is_attached = steampunk_blimp.check_passenger_is_attached(self, name)
 
             if pass_is_attached then
-                local can_bypass = minetest.check_player_privs(clicker, {protection_bypass=true})
+                local can_bypass = core.check_player_privs(clicker, {protection_bypass=true})
                 if clicker:get_player_control().aux1 == true then --lets see the inventory
                     local is_shared = false
                     if name == self.owner or can_bypass then is_shared = true end
@@ -562,7 +588,7 @@ minetest.register_entity("steampunk_blimp:blimp", {
                 for i = steampunk_blimp.max_seats,1,-1
                 do
                     if self._passengers[i] ~= nil then
-                        local old_player = minetest.get_player_by_name(self._passengers[i])
+                        local old_player = core.get_player_by_name(self._passengers[i])
                         if not old_player then self._passengers[i] = nil end
                     end
                 end

@@ -268,8 +268,8 @@ local function init_player_armor(initplayer)
 	local skin = armor:get_player_skin(name)
 	armor.textures[name] = {
 		skin = skin,
-		armor = "3d_armor_trans.png",
-		wielditem = "3d_armor_trans.png",
+		armor = "blank.png",
+		wielditem = "blank.png",
 		preview = armor.default_skin.."_preview.png",
 	}
 	local texture_path = minetest.get_modpath("player_textures")
@@ -291,21 +291,26 @@ player_api.register_model("3d_armor_character.b3d", {
 	animation_speed = 30,
 	textures = {
 		armor.default_skin..".png",
-		"3d_armor_trans.png",
-		"3d_armor_trans.png",
+		"blank.png",
+		"blank.png",
 	},
 	animations = {
 		stand = {x=0, y=79},
-		lay = {x=162, y=166},
+		lay = {x=162, y=166, eye_height = 0.3, override_local = true,
+			collisionbox = {-0.6, 0.0, -0.6, 0.6, 0.3, 0.6}},
 		walk = {x=168, y=187},
 		mine = {x=189, y=198},
 		walk_mine = {x=200, y=219},
-		sit = {x=81, y=160},
+		sit = {x=81, y=160, eye_height = 0.8, override_local = true,
+			collisionbox = {-0.3, 0.0, -0.3, 0.3, 1.0, 0.3}},
 		-- compatibility w/ the emote mod
 		wave = {x = 192, y = 196, override_local = true},
 		point = {x = 196, y = 196, override_local = true},
 		freeze = {x = 205, y = 205, override_local = true},
 	},
+	collisionbox = {-0.3, 0.0, -0.3, 0.3, 1.7, 0.3},
+	-- stepheight: use default
+	eye_height = 1.47,
 })
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
@@ -395,10 +400,14 @@ if armor.config.punch_damage == true then
 	minetest.register_on_punchplayer(function(player, hitter,
 			time_from_last_punch, tool_capabilities)
 		local name = player:get_player_name()
-		local hit_ip = hitter:is_player()
-		if name and hit_ip and minetest.is_protected(player:get_pos(), "") then
-			return
-		elseif name then
+		if hitter then
+			local hit_ip = hitter:is_player()
+			if name and hit_ip and minetest.is_protected(player:get_pos(), "") then
+				return
+			end
+		end
+
+		if name then
 			armor:punch(player, hitter, time_from_last_punch, tool_capabilities)
 			last_punch_time[name] = minetest.get_gametime()
 		end
@@ -440,7 +449,7 @@ minetest.register_globalstep(function(dtime)
 			local name = player:get_player_name()
 			if armor.def[name].feather > 0 then
 				local vel_y = player:get_velocity().y
-				if vel_y < 0 and vel_y < 3 then
+				if vel_y < -0.5 then
 					vel_y = -(vel_y * 0.05)
 					player:add_velocity({x = 0, y = vel_y, z = 0})
 				end

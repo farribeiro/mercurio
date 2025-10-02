@@ -19,6 +19,7 @@ minetest.register_node(":lrfurn:sofa", {
 	inventory_image = "lrfurn_sofa_inv.png",
 	wield_scale = { x = 0.6, y = 0.6, z = 0.6 },
 	groups = {snappy=3, ud_param2_colorable = 1, dig_tree=2, axey=5},
+	is_ground_content = false,
 	_mcl_hardness=1.6,
 	_sound_def = {
 		key = "node_sound_wood_defaults",
@@ -46,7 +47,9 @@ minetest.register_node(":lrfurn:sofa", {
 	on_dig = unifieddyes.on_dig,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		return lrfurn.sit(pos, node, clicker, itemstack, pointed_thing, 2)
-	end
+	end,
+	on_destruct = lrfurn.on_seat_destruct,
+	on_movenode = lrfurn.on_seat_movenode,
 })
 
 minetest.register_craft({

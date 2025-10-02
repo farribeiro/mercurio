@@ -175,15 +175,16 @@ function mobkit.get_node_height(pos)
 	
 	if node.walkable then
 		if node.drawtype == 'nodebox' then
-			if node.node_box and node.node_box.type == 'fixed' then
-				if type(node.node_box.fixed[1]) == 'number' then
-					return npos.y + node.node_box.fixed[5] ,0, false
-				elseif type(node.node_box.fixed[1]) == 'table' then
-					return npos.y + node.node_box.fixed[1][5] ,0, false
+			local collision_box = node.collision_box or node.node_box
+			if collision_box and collision_box.type == 'fixed' then
+				if type(collision_box.fixed[1]) == 'number' then
+					return npos.y + collision_box.fixed[5], 0, false
+				elseif type(collision_box.fixed[1]) == 'table' then
+					return npos.y + collision_box.fixed[1][5], 0, false
 				else
 					return npos.y + 0.5,1, false			-- todo handle table of boxes
 				end		
-			elseif node.node_box and node.node_box.type == 'leveled' then
+			elseif collision_box and collision_box.type == 'leveled' then
 				return minetest.get_node_level(pos)/64-0.5+mobkit.get_node_pos(pos).y, 0, false
 			else
 				return npos.y + 0.5,1, false	-- the unforeseen
@@ -230,7 +231,7 @@ function mobkit.get_spawn_pos_abr(dtime,intrvl,radius,chance,reduction)
 
 	if random()<dtime*(intrvl*#plyrs) then
 		local plyr = plyrs[random(#plyrs)]		-- choose random player
-		local vel = plyr:get_player_velocity()
+		local vel = minetest.features.object_step_has_moveresult and plyr:get_velocity() or plyr:get_player_velocity()
 		local spd = vector.length(vel)
 		chance = (1-chance) * 1/(spd*0.75+1)
 		
@@ -422,11 +423,11 @@ end
 function mobkit.is_alive(thing)		-- thing can be luaentity or objectref.
 --	if not thing then return false end
 	if not mobkit.exists(thing) then return false end
-	if type(thing) == 'table' then return thing.hp > 0 end
+	if type(thing) == 'table' then return thing.hp > 0 or (thing.health and thing.health > 0) end	-- support for mobs redo
 	if thing:is_player() then return thing:get_hp() > 0
 	else 
 		local lua = thing:get_luaentity()
-		local hp = lua and lua.hp or nil
+		local hp = lua and (lua.hp or lua.health) or nil	-- support for mobs redo
 		return hp and hp > 0
 	end
 end

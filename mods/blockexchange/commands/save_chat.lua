@@ -3,6 +3,9 @@ minetest.register_chatcommand("bx_save", {
   params = "<name>",
   description = "Uploads the selected region to the blockexchange server",
   func = blockexchange.api_check_wrapper(function(name, schemaname)
+    -- force-enable the hud
+    blockexchange.set_player_hud(name, true)
+
     if blockexchange.get_job_context(name) then
       return true, "There is a job already running"
     end
@@ -34,6 +37,10 @@ minetest.register_chatcommand("bx_save", {
 
     if not pos1 or not pos2 then
       return true, "you need to set /bx_pos1 and /bx_pos2 first!"
+    end
+
+    if not blockexchange.check_size(pos1, pos2) then
+      return true, "axis size limit of " .. blockexchange.max_size .. " nodes exceeded"
     end
 
     -- force-enable player-hud

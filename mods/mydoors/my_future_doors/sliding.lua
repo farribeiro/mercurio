@@ -1,3 +1,5 @@
+local rotate_disallow = rawget(_G, "screwdriver") and screwdriver.disallow or nil
+
 local doors = {
 	{"my_future_doors:door2a","my_future_doors:door2b","my_future_doors:door2c","my_future_doors:door2d","2","Steel",
 			{{"default:steel_ingot", "default:steelblock", ""},
@@ -147,6 +149,7 @@ local function add_door(doora, doorb, doorc, doord, num, des, recipe)
 				{-0.5, -0.5, -0.0625, 0.5, 1.5, 0.0625}
 			}
 		},
+		on_rotate = rotate_disallow,
 
 		on_place = onplace,
 
@@ -179,6 +182,7 @@ local function add_door(doora, doorb, doorc, doord, num, des, recipe)
 				{0, 0, 0, 0, 0, 0},
 			}
 		},
+		on_rotate = rotate_disallow,
 	})
 	minetest.register_node(doorc, {
 		tiles = {
@@ -209,6 +213,7 @@ local function add_door(doora, doorb, doorc, doord, num, des, recipe)
 		after_place_node = afterplace,
 		after_destruct = afterdestruct,
 		on_timer = ontimer,
+		on_rotate = rotate_disallow,
 	})
 	minetest.register_node(doord, {
 		tiles = {
@@ -235,6 +240,7 @@ local function add_door(doora, doorb, doorc, doord, num, des, recipe)
 				{0, 0, 0, 0, 0, 0},
 			}
 		},
+		on_rotate = rotate_disallow,
 	})
 	minetest.register_craft({
 		output = "my_future_doors:door"..num.."a 2",

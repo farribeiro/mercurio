@@ -4,6 +4,8 @@ local prefix = "pipeworks_"
 
 local settings = {
 	enable_pipes = true,
+	enable_item_tags = true,
+	enable_tag_tube = true,
 	enable_lowpoly = false,
 	enable_autocrafter = true,
 	enable_deployer = true,
@@ -29,6 +31,7 @@ local settings = {
 	delete_item_on_clearobject = true,
 	use_real_entities = true,
 	entity_update_interval = 0,
+	enable_vertical_digilines_connectivity = false,
 }
 
 pipeworks.toggles = {}

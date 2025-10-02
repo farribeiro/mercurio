@@ -1,4 +1,5 @@
 local S = digilines.S
+local FS = digilines.FS
 
 --* parts are currently not possible because you cannot set the pitch of an entity from lua
 
@@ -186,7 +187,7 @@ local lcds = {
 }
 
 local reset_meta = function(pos)
-	minetest.get_meta(pos):set_string("formspec", "field[channel;Channel;${channel}]")
+	minetest.get_meta(pos):set_string("formspec", "field[channel;"..FS("Channel")..";${channel}]")
 end
 
 local clearscreen = function(pos)
@@ -259,6 +260,8 @@ local on_digiline_receive = function(pos, _, channel, msg)
 	local setchan = meta:get_string("channel")
 	if setchan ~= channel then return end
 
+	if type(msg) ~= "string" and type(msg) ~= "number" then return end
+
 	meta:set_string("text", msg)
 	meta:set_string("infotext", msg)
 
@@ -286,6 +289,7 @@ minetest.register_node("digilines:lcd", {
 	node_box = lcd_box,
 	selection_box = lcd_box,
 	groups = {choppy = 3, dig_immediate = 2},
+	is_ground_content = false,
 	_mcl_blast_resistance = 1,
 	_mcl_hardness = 0.8,
 	after_place_node = function(pos)
@@ -335,9 +339,11 @@ minetest.register_lbm({
 })
 
 minetest.register_entity(":digilines_lcd:text", {
-	collisionbox = { 0, 0, 0, 0, 0, 0 },
-	visual = "upright_sprite",
-	textures = {},
+	initial_properties = {
+		collisionbox = { 0, 0, 0, 0, 0, 0 },
+		visual = "upright_sprite",
+		textures = {},
+	},
 	on_activate = set_texture,
 })
 

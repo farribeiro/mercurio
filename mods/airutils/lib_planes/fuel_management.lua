@@ -25,10 +25,10 @@ function airutils.loadFuel(self, player_name)
             self._energy = self._energy + fuel
             if self._energy > self._max_fuel then self._energy = self._max_fuel end
 
-            local energy_indicator_angle = airutils.get_gauge_angle(self._energy)
+            --local energy_indicator_angle = airutils.get_gauge_angle(self._energy)
             --self.fuel_gauge:set_attach(self.object,'',self._gauge_fuel_position,{x=0,y=0,z=energy_indicator_angle})
         end
-        
+
         return true
     end
 
@@ -41,12 +41,15 @@ function airutils.consumptionCalc(self, accel)
         local divisor = 700000
         if self._fuel_consumption_divisor then divisor = self._fuel_consumption_divisor end
         local consumed_power = 0
-        if self._rotor_speed then
-            --is an helicopter
-            consumed_power = 50/divisor --fixed rpm
-        else
-            --is a normal plane
-            consumed_power = self._power_lever/divisor
+        local parent_obj = self.object:get_attach()
+        if not parent_obj then
+            if self._rotor_speed then
+                --is an helicopter
+                consumed_power = 50/divisor --fixed rpm
+            else
+                --is a normal plane
+                consumed_power = self._power_lever/divisor
+            end
         end
         --minetest.chat_send_all('consumed: '.. consumed_power)
         self._energy = self._energy - consumed_power;

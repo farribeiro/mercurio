@@ -29,9 +29,9 @@ You need a chessboard to play. Craft yourself a chessboard like this:
     BWB
     sss
 
-B = Black Dye
-W = White Dye
-s = Wooden Slab (from apple tree)
+* B = Black Dye
+* W = White Dye
+* s = Wooden Slab (from apple tree)
 
 Place the chessboard and examine it. You will see a close-up of the chessboard.
 
@@ -64,8 +64,7 @@ It is written in a figurine long algebraic notation (see appendix).
 
 The two boxes below the list of moves is where all the captured pieces
 go. This has no gameplay significance but it may serve as a visual
-aid to see how badly hurt the player's “armies” are. This section
-may change
+aid to see how badly hurt the player's “armies” are.
 
 The top right corner is used for starting a new game. Press
 “New Game” to start a new game. This ends the current game.
@@ -121,7 +120,7 @@ a capturing move are identical. Only for the pawn it is different
 
 If the square of the king is attacked, he and the player playing him
 is considered to be in “check”.
-If a player is in check, any move which would put or leave the own
+While a player is in check, any move which would their own
 king under attack is not allowed.
 
 #### How to actually move
@@ -148,9 +147,6 @@ no effect.)
 The rook looks like a tower and can move to any of square that lies
 in a straight horizontal or vertical line from it.
 It cannot move beyond pieces that are in the way.
-
-The rook can move on a square occupied by an opponent, which
-w
 
 The rook may be involved in Castling, see “King” below.
 
@@ -218,7 +214,7 @@ If all the conditions are met, here’s how you castle:
 Place the king two squares towards the rook you want to castle with.
 This square is where the king will end up. The rook will then
 automatically move towards the king and “jump” to the square
-behind the king, from the rooks viewpoint.
+behind the king, from the rook’s viewpoint.
 
 **Remember**: You *must* move the king (not the rook) if you want
 to castle. If you move the rook instead, this is considered
@@ -234,9 +230,11 @@ pieces have started).
 The pawn’s basic moves are:
 
 1. Single step: The pawn moves one step vertically towards the
-                opponent’s side. It is not possible to walk backwards.
+                opponent’s side.
 2. Double step: Like a single step, but it moves two squares instead.
                 This is only possible from the pawn’s start position.
+
+A pawn can never move backwards.
 
 In both cases, the destination square must be empty as well as any crossed square.
 The pawn cannot capture by a single or double step, however.
@@ -289,7 +287,7 @@ is not taken, it will be gone from that point on.
 
 ##### Promotion
 
-When a pawn reaches the other end of the chessboard (from its viewpoint)
+When a pawn reaches the other end of the chessboard (from its viewpoint),
 it will be promoted. A promotion is considered to be part of the move.
 
 When promotion happens, the boxes where normally the captured pieces go
@@ -300,7 +298,7 @@ Just click the corresponding button. These buttons only work for the
 current player. Promotion is mandatory and no other moves are possible
 until it is completed.
 
-Once a piece was selected, the pawn will be replaced replaced, which
+Once a piece was selected, the pawn will be replaced, which
 immediately activates its powers. This ends the move.
 
 ### The end of the game
@@ -438,8 +436,10 @@ dig the chessboard.
 
 ### The Chess Notation
 
-The list of moves is in a special notation called “algebraic notation”. There are many
-variants of it, so this section explains what it means in X-Decor-libre.
+The chessboard interface shows a list of all moves on the right side.
+
+The list of moves is written in a special notation called “algebraic notation”.
+There are many variants of it, so this section explains what it means in X-Decor-libre.
 
 This mod uses a longform figurine algebraic notation. “figurine” means that
 icons are used for the chess pieces. “longform” means the start
@@ -493,7 +493,7 @@ When a player castles, it is notated the following way:
 
 #### Game completion
 
-If the game completed, the end of the game showing the result is listed in a final separate line as:
+If the game came to an end, the game result is written in a final separate line as:
 
 * “1–0” if White won
 * “0–1” if Black won
@@ -501,11 +501,11 @@ If the game completed, the end of the game showing the result is listed in a fin
 
 #### Example
 
-    1.  d2—d4    e7—e6
+    1.  d2–d4    e7–e6
     2. ♔e1–d2   ♛d8–h4
     3.  d4–d5    e6×d5
     ...
-    8. d8×d8♖   ♞b8-c6
+    8. d8×d8♖   ♞b8–c6
     9. e2–e4	 d4×e3 e.p.
 
 Explanation of the moves:
@@ -513,7 +513,7 @@ Explanation of the moves:
 * 1.: First fullmove: White moves pawn from d2 to d4, Black moves pawn from e7 to e6
 * 2.: Second fullmove: White moves king from e1 to d2, Black moves queen from d8 to h4
 * 3.: Third fullmove: White moves pawn from d4 to d5, Black moves pawn from d6 to d5 and captures
-* 8.: Eight fullmove: White moves pawn from d7 to d8, captures a piece and promotes it to rook, Black moves knight from b8 to c6
+* 8.: Eighth fullmove: White moves pawn from d7 to d8, captures a piece and promotes it to rook, Black moves knight from b8 to c6
 * 9.: Ninth fullmove: White moves pawn from e2 to e4, black moves pawn from d4 to e3 and captures en passant
 
 #### Other symbols

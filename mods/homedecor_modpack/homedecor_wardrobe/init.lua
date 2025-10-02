@@ -71,9 +71,9 @@ local function set_player_skin(player, skin, save)
 	if save and not skinsdb_mod_path then
 
 		if skin == default_skin then
-			player:set_attribute("homedecor:player_skin", "")
+			player:get_meta():set_string("homedecor:player_skin", "")
 		else
-			player:set_attribute("homedecor:player_skin", skin)
+			player:get_meta():set_string("homedecor:player_skin", skin)
 		end
 	end
 end
@@ -94,6 +94,7 @@ local def = {
 	paramtype2 = "facedir",
 
 	groups = {snappy = 3, axey=5},
+	is_ground_content = false,
 	_mcl_hardness=1.6,
 	selection_box = wd_cbox,
 	collision_box = wd_cbox,

@@ -12,7 +12,7 @@ homedecor.register("window_quartered", {
 		"homedecor_window_quartered.png",
 		"homedecor_window_quartered.png"
 	},
-	use_texture_alpha = "blend",
+	use_texture_alpha = "clip",
 	groups = {snappy=3, dig_glass=2},
 	_sound_def = {
 		key = "node_sound_glass_defaults",
@@ -161,7 +161,7 @@ homedecor.register("curtain_open", {
 local mats = {
 	{ "brass", S("brass"), "homedecor_generic_metal_brass.png" },
 	{ "wrought_iron", S("wrought iron"), "homedecor_generic_metal_wrought_iron.png" },
-	{ "wood", S("wood"), homedecor.textures.default_wood }
+	{ "wood", S("wood"), homedecor.textures.wood.apple.planks }
 }
 
 for _, m in ipairs(mats) do

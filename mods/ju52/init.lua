@@ -32,6 +32,10 @@ function ju52.register_parts_method(self)
     self.wheels = wheels
     airutils.add_paintable_part(self, self.wheels)
 
+    local cabin = minetest.add_entity(pos,'ju52:cabin_interactor')
+    cabin:set_attach(self.object,'',{x=0,y=0,z=40},{x=0,y=0,z=0})
+    self.cabin = cabin
+
     self.object:set_bone_position("aileron_base_r", {x=93.7994, y=3.35, z=-15.3002}, {x=180, y=-7.45, z=5.3})
     self.object:set_bone_position("aileron_base_l", {x=-93.7994, y=3.35, z=-15.3002}, {x=180, y=7.54, z=-5.3})
 
@@ -43,8 +47,7 @@ end
 
 function ju52.destroy_parts_method(self)
     if self.wheels then self.wheels:remove() end
-
-    local pos = self.object:get_pos()
+    if self.cabin then self.cabin:remove() end
 end
 
 function ju52.step_additional_function(self)
@@ -64,7 +67,7 @@ function ju52.step_additional_function(self)
 
     local energy_indicator_angle = airutils.get_gauge_angle((self._max_fuel - self._energy)/3) - 90
     self.object:set_bone_position("fuel", {x=0, y=-40.6, z=15.35}, {x=0, y=(energy_indicator_angle+180), z=0})
-    
+
     self.object:set_bone_position("compass", {x=0, y=-40.55, z=18.2}, {x=0, y=(math.deg(self._yaw)), z=0})
     self.object:set_bone_position("compass_plan", {x=0, y=-40.4, z=18.2}, {x=0, y=airutils.get_adf_angle(self, pos), z=0})
 
@@ -104,9 +107,9 @@ end
 ju52.plane_properties = {
 	initial_properties = {
 	    physical = true,
-        collide_with_objects = false,
-	    collisionbox = {-5, -2.31, -5, 5, 1, 5},
-	    selectionbox = {-5, -2.31, -5, 5, 1, 5},
+        collide_with_objects = true,
+	    collisionbox = {-4, -2.31, -4, 4, 1, 4},
+	    selectionbox = {-2, -2.31, -2, 2, 1, 2},
 	    visual = "mesh",
         backface_culling = false,
 	    mesh = "ju52_body.b3d",
@@ -268,13 +271,6 @@ dofile(minetest.get_modpath("ju52") .. DIR_DELIM .. "entities.lua")
 --
 -- items
 --
-
-settings = Settings(minetest.get_worldpath() .. "/ju52.conf")
-local function fetch_setting(name)
-    local sname = name
-    return settings and settings:get(sname) or minetest.settings:get(sname)
-end
-
 
 local old_entities = {"ju52:seat_base","ju52:engine"}
 for _,entity_name in ipairs(old_entities) do

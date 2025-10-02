@@ -1,7 +1,11 @@
 minetest.register_chatcommand("bx_load_update", {
     params = "[area_id?]",
     description = "downloads changes",
+    privs = {blockexchange = true},
     func = function(name, area_id)
+        -- force-enable the hud
+        blockexchange.set_player_hud(name, true)
+
         local area, err_msg = blockexchange.select_player_area(name, area_id)
         if err_msg then
             return false, err_msg

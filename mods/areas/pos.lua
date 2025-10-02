@@ -4,7 +4,7 @@ local S = minetest.get_translator("areas")
 -- permission to use those commands and you don't have
 -- /area_pos{1,2} [X Y Z|X,Y,Z].
 -- Since this is mostly copied from WorldEdit it is mostly
--- licensed under the AGPL. (select_area is a exception)
+-- licensed under the AGPL. (select_area is an exception)
 
 areas.marker1 = {}
 areas.marker2 = {}
@@ -20,6 +20,37 @@ local function posLimit(pos)
 		y = math.max(math.min(pos.y, LIMIT), -LIMIT),
 		z = math.max(math.min(pos.z, LIMIT), -LIMIT)
 	}
+end
+
+local parse_relative_pos
+
+if minetest.parse_relative_number then
+	parse_relative_pos = function(x_str, y_str, z_str, pos)
+
+		local x = pos and minetest.parse_relative_number(x_str, pos.x)
+			or tonumber(x_str)
+		local y = pos and minetest.parse_relative_number(y_str, pos.y)
+			or tonumber(y_str)
+		local z = pos and minetest.parse_relative_number(z_str, pos.z)
+			or tonumber(z_str)
+		if x and y and z then
+			return vector.new(x, y, z)
+		end
+	end
+else
+	parse_relative_pos = function(x_str, y_str, z_str, pos)
+		local x = tonumber(x_str)
+		local y = tonumber(y_str)
+		local z = tonumber(z_str)
+		if x and y and z then
+			return vector.new(x, y, z)
+		elseif string.sub(x_str, 1, 1) == "~"
+			or string.sub(y_str, 1, 1) == "~"
+			or string.sub(z_str, 1, 1) == "~" then
+			return nil, S("Relative coordinates is not supported on this server. " ..
+				"Please upgrade Minetest to 5.7.0 or newer versions.")
+		end
+	end
 end
 
 minetest.register_chatcommand("select_area", {
@@ -47,19 +78,24 @@ minetest.register_chatcommand("area_pos1", {
 	privs = {},
 	func = function(name, param)
 		local pos
-		local found, _, x, y, z = param:find(
-				"^(-?%d+)[, ](-?%d+)[, ](-?%d+)$")
+		local player = minetest.get_player_by_name(name)
+		if player then
+			pos = vector.round(player:get_pos())
+		end
+		local found, _, x_str, y_str, z_str = param:find(
+			"^(~?-?%d*)[, ](~?-?%d*)[, ](~?-?%d*)$")
 		if found then
-			pos = {x=tonumber(x), y=tonumber(y), z=tonumber(z)}
-		elseif param == "" then
-			local player = minetest.get_player_by_name(name)
-			if player then
-				pos = player:get_pos()
-			else
-				return false, S("Unable to get position.")
+			local get_pos, reason = parse_relative_pos(x_str, y_str, z_str, pos)
+			if get_pos then
+				pos = get_pos
+			elseif not get_pos and reason then
+				return false, reason
 			end
-		else
+		elseif param ~= "" then
 			return false, S("Invalid usage, see /help @1.", "area_pos1")
+		end
+		if not pos then
+			return false, S("Unable to get position.")
 		end
 		pos = posLimit(vector.round(pos))
 		areas:setPos1(name, pos)
@@ -74,19 +110,24 @@ minetest.register_chatcommand("area_pos2", {
 		.." location or the one specified", "2"),
 	func = function(name, param)
 		local pos
-		local found, _, x, y, z = param:find(
-				"^(-?%d+)[, ](-?%d+)[, ](-?%d+)$")
+		local player = minetest.get_player_by_name(name)
+		if player then
+			pos = vector.round(player:get_pos())
+		end
+		local found, _, x_str, y_str, z_str = param:find(
+			"^(~?-?%d*)[, ](~?-?%d*)[, ](~?-?%d*)$")
 		if found then
-			pos = {x=tonumber(x), y=tonumber(y), z=tonumber(z)}
-		elseif param == "" then
-			local player = minetest.get_player_by_name(name)
-			if player then
-				pos = player:get_pos()
-			else
-				return false, S("Unable to get position.")
+			local get_pos, reason = parse_relative_pos(x_str, y_str, z_str, pos)
+			if get_pos then
+				pos = get_pos
+			elseif not get_pos and reason then
+				return false, reason
 			end
-		else
+		elseif param ~= "" then
 			return false, S("Invalid usage, see /help @1.", "area_pos2")
+		end
+		if not pos then
+			return false, S("Unable to get position.")
 		end
 		pos = posLimit(vector.round(pos))
 		areas:setPos2(name, pos)
@@ -111,7 +152,7 @@ minetest.register_chatcommand("area_pos", {
 			areas.set_pos[name] = "pos2"
 			return true, S("Select position @1 by punching a node.", "2")
 		elseif param == "get" then -- Display current area positions
-			local pos1str, pos2str = S("Position @1: ", "1"), S("Position @1: ", "2")
+			local pos1str, pos2str = S("Position @1:", " 1"), S("Position @1:", " 2")
 			if areas.pos1[name] then
 				pos1str = pos1str..minetest.pos_to_string(areas.pos1[name])
 			else
