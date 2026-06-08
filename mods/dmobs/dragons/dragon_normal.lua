@@ -39,7 +39,6 @@ mobs:register_mob("dmobs:dragon", {
 	},
 	walk_velocity = 3,
 	run_velocity = 5,
-	jump = true,
 	fly = true,
 	drops = {
 		{name = "mobs:lava_orb", chance = 1, min = 1, max = 1}

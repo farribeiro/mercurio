@@ -60,11 +60,9 @@ mobs:register_mob("dmobs:pig", {
 
 	on_rightclick = function(self, clicker)
 
-		if mobs:feed_tame(self, clicker, 8, true, true) then
-			return
-		end
-
-		mobs:capture_mob(self, clicker, 0, 5, 50, false, nil)
+		if mobs:protect(self, clicker) then return end
+		if mobs:feed_tame(self, clicker, 8, true, true) then return end
+		if mobs:capture_mob(self, clicker, 0, 5, 50, false, nil) then return end
 	end
 })
 

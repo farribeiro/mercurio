@@ -17,19 +17,19 @@ local shoes = {
 -- rideable horse
 
 mobs:register_mob("mob_horse:horse", {
+	description = S("Horse"),
 	type = "animal",
 	visual = "mesh",
 	visual_size = {x = 1.20, y = 1.20},
 	mesh = "mobs_horse.x",
 	collisionbox = {-0.4, -0.01, -0.4, 0.4, 1.25, 0.4},
 	animation = {
-		speed_normal = 15, speed_run = 30,
-		stand_start = 25, stand_end = 50, -- 75
-		stand2_start = 25, stand2_end = 25,
-		stand3_start = 55, stand3_end = 75, stand3_loop = false,
+		speed_normal = 15,
+		stand_start = 25, stand_end = 25, -- stand still
+		stand2_start = 25, stand2_end = 50, stand2_loop = false, -- head to side
 		walk_start = 75, walk_end = 100,
-		run_start = 75, run_end = 100,
-		punch_start = 55, punch_end = 75, punch_speed = 35,
+		run_start = 75, run_end = 100, run_speed = 45,
+		punch_start = 55, punch_end = 75, punch_speed = 35 -- rear up
 	},
 	textures = {
 		{"mobs_horse.png"}, -- textures by Mjollna
@@ -46,6 +46,7 @@ mobs:register_mob("mob_horse:horse", {
 		"farming:barley", "farming:corn"
 	},
 	passive = false, attack_type = "dogfight", reach = 2.5, damage = 3,
+	attack_chance = 95,
 	attack_monsters = true,
 	hp_min = 15,
 	hp_max = 23,
@@ -55,23 +56,39 @@ mobs:register_mob("mob_horse:horse", {
 	fall_damage = 1,
 	water_damage = 0,
 	makes_footstep_sound = true,
+	sounds = {
+		random = "mob_horse",
+		death = "mob_horse_whinny",
+		attack = "mob_horse_whinny"
+	},
 	drops = {
 		{name = "mobs:leather", chance = 1, min = 0, max = 2},
 		{name = "mobs:meat_raw", chance = 1, min = 1, max = 2}
 	},
 
+	do_mount_action = function(self, dtime) -- holding sneak and LMB while riding horse
+
+		-- only allowed to continue after 5 seconds
+		self.neigh_timer = (self.neigh_timer or 0)
+		if (os.time() - self.neigh_timer) < 5 then return end
+
+		core.sound_play("mob_horse_whinny", {pos = self.object:get_pos()}, true)
+
+		self.neigh_timer = os.time()
+	end,
+
 	do_custom = function(self, dtime)
 
-		-- set needed values if not already present
-		if not self.v2 then
-			self.v2 = 0
+		-- set required values if not already present
+		if not self.max_speed_forward then
+
 			self.max_speed_forward = 6
 			self.max_speed_reverse = 2
 			self.accel = 6
-			self.terrain_type = 3
 			self.driver_attach_at = {x = 0, y = 10, z = -2}
 			self.driver_eye_offset = {x = 0, y = 10 + 3, z = 0}
 			self.driver_scale = {x = 0.8, y = 0.8} -- shrink driver to fit model
+--			self.alt_turn = true -- uses left and right keys to turn horse instead
 		end
 
 		-- if driver present allow control of horse
@@ -81,8 +98,6 @@ mobs:register_mob("mob_horse:horse", {
 
 			return false -- skip rest of mob functions
 		end
-
-		return true
 	end,
 
 	on_die = function(self, pos)
@@ -100,14 +115,6 @@ mobs:register_mob("mob_horse:horse", {
 		-- drop any horseshoes added
 		if self.shoed then
 			minetest.add_item(pos, self.shoed)
-		end
-	end,
-
-	do_punch = function(self, hitter)
-
-		-- don't cut the branch you're... ah, that's not about that
-		if hitter ~= self.driver then
-			return true
 		end
 	end,
 
@@ -135,6 +142,8 @@ mobs:register_mob("mob_horse:horse", {
 			if self.driver and clicker == self.driver then
 
 				mobs.detach(clicker, {x = 1, y = 0, z = 1})
+
+				self:set_animation("stand")
 
 				return
 			end
@@ -243,9 +252,9 @@ else
 	})
 end
 
--- spawn egg
+-- spawn egg (true at end means horse can be placed in protected areas)
 
-mobs:register_egg("mob_horse:horse", S("Horse"), "wool_brown.png", 1)
+mobs:register_egg("mob_horse:horse", S("Horse"), "wool_brown.png", 1, nil, true)
 
 -- steel horseshoes
 

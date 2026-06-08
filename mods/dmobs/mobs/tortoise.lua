@@ -1,7 +1,7 @@
 
 local drops = {{name = "default:stick", chance = 1, min = 1, max = 1}}
 
-if minetest.get_modpath("farming") then
+if core.get_modpath("farming") then
 
 	drops = {
 		{name = "default:stick", chance = 1, min = 1, max = 1},
@@ -14,7 +14,7 @@ mobs:register_mob("dmobs:tortoise", {
 	type = "animal",
 	passive = false,
 	reach = 1,
-	damage = 2,
+	damage = 2, attack_chance = 99,
 	attack_type = "dogfight",
 	hp_min = 6,
 	hp_max = 12,
@@ -60,6 +60,7 @@ mobs:register_mob("dmobs:tortoise", {
 
 	on_rightclick = function(self, clicker)
 
+		if mobs:protect(self, clicker) then return end
 		if mobs:feed_tame(self, clicker, 8, true, true) then return end
 		if mobs:capture_mob(self, clicker, nil, 50, 80, false, nil) then return end
 
@@ -70,7 +71,7 @@ mobs:register_mob("dmobs:tortoise", {
 			self:set_velocity(0)
 			self:set_animation("hide")
 
-			minetest.after(5, function()
+			core.after(5, function()
 
 				if self and self.object then
 

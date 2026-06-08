@@ -1,5 +1,5 @@
 
-local S = minetest.get_translator("mobs")
+local S = core.get_translator("mobs")
 
 -- add lucky blocks
 
@@ -15,12 +15,13 @@ lucky_block:add_blocks({
 	{"dro", {"mobs:protector"}, 1},
 	{"dro", {"mobs:fence_wood"}, 10},
 	{"dro", {"mobs:fence_top"}, 12},
-	{"lig"}
+	{"lig"},
+	{"dro", {"mobs:mob_repellent"}, 1}
 })
 
 -- pint sized rune, use on tamed mob to shrink to half-size
 
-minetest.register_craftitem(":mobs:pint_sized_rune", {
+core.register_craftitem(":mobs:pint_sized_rune", {
 	description = S("Pint Sized Rune"),
 	inventory_image = "mobs_pint_sized_rune.png",
 	groups = {flammable = 2},
@@ -38,18 +39,16 @@ minetest.register_craftitem(":mobs:pint_sized_rune", {
 		local self = pointed_thing.ref:get_luaentity()
 
 		if not self._cmi_is_mob then
-			minetest.chat_send_player(name, S("Not a Mobs Redo mob!"))
-			return
+			core.chat_send_player(name, S("Not a Mobs Redo mob!")) ; return
 		end
 
 		if not self.tamed then
-			minetest.chat_send_player(name, S("Not tamed!"))
+			core.chat_send_player(name, S("Not tamed!"))
 			return
 		end
 
 		if self.pint_size_potion then
-			minetest.chat_send_player(name, S("Potion already applied!"))
-			return
+			core.chat_send_player(name, S("Potion already applied!")) ; return
 		end
 
 		if not mobs.is_creative(user:get_player_name()) then
@@ -57,31 +56,13 @@ minetest.register_craftitem(":mobs:pint_sized_rune", {
 			user:set_wielded_item(tool)
 		end
 
-		local pos = self.object:get_pos()
-		local prop = self.object:get_properties()
+		local pos = self.object:get_pos() ; if not pos then return end
 
-		vis_size = {x = self.base_size.x * .5, y = self.base_size.y * .5}
-
-		self.base_size = vis_size
-
-		colbox = {
-			self.base_colbox[1] * .5, self.base_colbox[2] * .5,
-			self.base_colbox[3] * .5, self.base_colbox[4] * .5,
-			self.base_colbox[5] * .5, self.base_colbox[6] * .5}
-
-		self.base_colbox = colbox
-
-		selbox = {
-			self.base_selbox[1] * .5, self.base_selbox[2] * .5,
-			self.base_selbox[3] * .5, self.base_selbox[4] * .5,
-			self.base_selbox[5] * .5, self.base_selbox[6] * .5}
-
-		self.base_selbox = selbox
-
-		self.object:set_properties(
-				{visual_size = vis_size, collisionbox = colbox, selectionbox = selbox})
+		mobs:scale_mob(self, .5, .5, true)
 
 		self.pint_size_potion = true
+
+		local prop = self.object:get_properties()
 
 		pos.y = pos.y + prop.collisionbox[5]
 
@@ -91,7 +72,7 @@ minetest.register_craftitem(":mobs:pint_sized_rune", {
 	end
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "lucky_block:pint_sized_rune",
 	recipe = {{"lucky_block:pint_sized_potion", "mobs:protector"}}
 })

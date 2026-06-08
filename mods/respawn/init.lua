@@ -1,7 +1,7 @@
 -- Global respawn namespace
 respawn = {}
-respawn.path = minetest.get_modpath( minetest.get_current_modname() )
-respawn.S = minetest.get_translator( "respawn" )
+respawn.path = core.get_modpath( core.get_current_modname() )
+respawn.S = core.get_translator( "respawn" )
 
 -- Load files
 dofile( respawn.path .. "/storage.lua" )
@@ -12,7 +12,7 @@ respawn.load()
 
 
 
-minetest.register_on_respawnplayer( function( player )
+core.register_on_respawnplayer( function( player )
 	respawn.respawn( player )
 	-- returning true has no effect despite what the doc tells
 	return true
@@ -20,7 +20,7 @@ end )
 
 
 
-minetest.register_on_newplayer( function( player )
+core.register_on_newplayer( function( player )
 	respawn.respawn( player )
 	-- returning true has no effect despite what the doc tells
 	return true
@@ -28,7 +28,7 @@ end )
 
 
 
-minetest.register_on_punchplayer( function( player, hitter, time_from_last_punch, tool_capabilities, dir, damage )
+core.register_on_punchplayer( function( player, hitter, time_from_last_punch, tool_capabilities, dir, damage )
 	local hp = player:get_hp()
 	
 	if hp <= 0 or hp - damage > 0 or not hitter then return end
@@ -45,40 +45,40 @@ minetest.register_on_punchplayer( function( player, hitter, time_from_last_punch
 		local luaEntity = hitter:get_luaentity()
 		
 		--[[ Debug to find some hidden names
-		minetest.chat_send_all( "----- debug hitter's properties -----" )
+		core.chat_send_all( "----- debug hitter's properties -----" )
 		for k,v in pairs( properties ) do
-			minetest.chat_send_all( "" .. k .. ": " .. tostring( v ) )
+			core.chat_send_all( "" .. k .. ": " .. tostring( v ) )
 		end
 		
-		minetest.chat_send_all( "----- debug hitter's nametag attributes -----" )
+		core.chat_send_all( "----- debug hitter's nametag attributes -----" )
 		for k,v in pairs( hitter:get_nametag_attributes() ) do
-			minetest.chat_send_all( "" .. k .. ": " .. tostring( v ) )
+			core.chat_send_all( "" .. k .. ": " .. tostring( v ) )
 		end
 		
-		minetest.chat_send_all( "----- debug hitter:get_luaentity() -----" )
+		core.chat_send_all( "----- debug hitter:get_luaentity() -----" )
 		for k,v in pairs( hitter:get_luaentity() ) do
-			minetest.chat_send_all( "" .. k .. ": " .. tostring( v ) )
+			core.chat_send_all( "" .. k .. ": " .. tostring( v ) )
 		end
 
-		minetest.chat_send_all( "----- debug hitter:get_luaentity()'s meta table -----" )
+		core.chat_send_all( "----- debug hitter:get_luaentity()'s meta table -----" )
 		for k,v in pairs( getmetatable( hitter:get_luaentity() ) ) do
-			minetest.chat_send_all( "" .. k .. ": " .. tostring( v ) )
+			core.chat_send_all( "" .. k .. ": " .. tostring( v ) )
 		end
 
-		minetest.chat_send_all( "----- debug hitter:get_luaentity()'s meta table's __index -----" )
+		core.chat_send_all( "----- debug hitter:get_luaentity()'s meta table's __index -----" )
 		for k,v in pairs( getmetatable( hitter:get_luaentity() ).__index ) do
-			minetest.chat_send_all( "" .. k .. ": " .. tostring( v ) )
+			core.chat_send_all( "" .. k .. ": " .. tostring( v ) )
 		end
 
-		minetest.chat_send_all( "----- debug hitter.name -----" .. ( hitter.name or "(none)" ) )
-		minetest.chat_send_all( "----- debug hitter.nametag -----" .. ( hitter.nametag or "(none)" ) )
-		minetest.chat_send_all( "----- debug hitter.nametag2 -----" .. ( hitter.nametag2 or "(none)" ) )
-		minetest.chat_send_all( "----- debug hitter:get_luaentity().name -----" .. ( hitter:get_luaentity().name or "(none)" ) )
-		minetest.chat_send_all( "----- debug hitter:get_luaentity().nametag -----" .. ( hitter:get_luaentity().nametag or "(none)" ) )
-		minetest.chat_send_all( "----- debug hitter:get_luaentity().nametag2 -----" .. ( hitter:get_luaentity().nametag2 or "(none)" ) )
-		minetest.chat_send_all( "----- debug properties.name -----" .. ( properties.name or "(none)" ) )
-		minetest.chat_send_all( "----- debug properties.nametag -----" .. ( properties.nametag or "(none)" ) )
-		minetest.chat_send_all( "----- debug properties.nametag2 -----" .. ( properties.nametag2 or "(none)" ) )
+		core.chat_send_all( "----- debug hitter.name -----" .. ( hitter.name or "(none)" ) )
+		core.chat_send_all( "----- debug hitter.nametag -----" .. ( hitter.nametag or "(none)" ) )
+		core.chat_send_all( "----- debug hitter.nametag2 -----" .. ( hitter.nametag2 or "(none)" ) )
+		core.chat_send_all( "----- debug hitter:get_luaentity().name -----" .. ( hitter:get_luaentity().name or "(none)" ) )
+		core.chat_send_all( "----- debug hitter:get_luaentity().nametag -----" .. ( hitter:get_luaentity().nametag or "(none)" ) )
+		core.chat_send_all( "----- debug hitter:get_luaentity().nametag2 -----" .. ( hitter:get_luaentity().nametag2 or "(none)" ) )
+		core.chat_send_all( "----- debug properties.name -----" .. ( properties.name or "(none)" ) )
+		core.chat_send_all( "----- debug properties.nametag -----" .. ( properties.nametag or "(none)" ) )
+		core.chat_send_all( "----- debug properties.nametag2 -----" .. ( properties.nametag2 or "(none)" ) )
 		--]]
 		
 		local name
@@ -108,7 +108,7 @@ end )
 
 
 
-minetest.register_on_player_hpchange( function( player, hp_change, reason )
+core.register_on_player_hpchange( function( player, hp_change, reason )
 	local hp = player:get_hp()
 	local by_type
 	local by
@@ -122,22 +122,22 @@ minetest.register_on_player_hpchange( function( player, hp_change, reason )
 	elseif reason.type=="drown" then
 		by_type = "drown"
 		local eye_pos = vector.add( { x = 0, z = 0, y = player:get_properties().eye_height } , pos )
-		by = minetest.get_node( eye_pos ).name
+		by = core.get_node( eye_pos ).name
 	elseif reason.type == "node_damage" then
 		-- from deathlist mod
 		by_type = "node"
 		local eye_pos = vector.add( { x = 0, z = 0, y = player:get_properties().eye_height } , pos )
-		local killing_node_head_name = minetest.get_node( eye_pos ).name
-		local killing_node_head = minetest.registered_nodes[ killing_node_head_name ]
-		local killing_node_feet_name = minetest.get_node( pos ).name
-		local killing_node_feet = minetest.registered_nodes[ killing_node_feet_name ]
+		local killing_node_head_name = core.get_node( eye_pos ).name
+		local killing_node_head = core.registered_nodes[ killing_node_head_name ]
+		local killing_node_feet_name = core.get_node( pos ).name
+		local killing_node_feet = core.registered_nodes[ killing_node_feet_name ]
 		by = killing_node_feet_name
 		
 		if ( killing_node_head.node_damage or 0 ) > ( killing_node_feet.node_damage or 0 ) then
 			by = killing_node_head_name
 		end
 	elseif reason.type == "punch" then
-		-- do nothing, it should already be done by minetest.register_on_punchplayer()
+		-- do nothing, it should already be done by core.register_on_punchplayer()
 		--by_type = "punch"
 		return
 	elseif reason.type == "set_hp" then
@@ -156,3 +156,4 @@ minetest.register_on_player_hpchange( function( player, hp_change, reason )
 		damage = - hp_change
 	} )
 end )
+

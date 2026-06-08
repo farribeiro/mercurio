@@ -1,4 +1,4 @@
-minetest.register_craft({
+core.register_craft({
 	output = 'etherium_stuff:torch 4',
 	recipe = {
 		{'ethereal:etherium_dust'},
@@ -7,7 +7,7 @@ minetest.register_craft({
 	}
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = 'etherium_stuff:torch 4',
 	recipe = {
 		{'ethereal:etherium_dust'},
@@ -16,8 +16,8 @@ minetest.register_craft({
 	}
 })
 
-if minetest.get_modpath("df_trees") then
-	minetest.register_craft({
+if core.get_modpath("df_trees") then
+	core.register_craft({
 		output = 'etherium_stuff:torch 8',
 		recipe = {
 			{'ethereal:etherium_dust'},
@@ -27,8 +27,8 @@ if minetest.get_modpath("df_trees") then
 	})
 end
 
-if minetest.get_modpath("terumet") then
-	minetest.register_craft({
+if core.get_modpath("terumet") then
+	core.register_craft({
 		output = 'etherium_stuff:torch 8',
 		recipe = {
 			{'ethereal:etherium_dust'},
@@ -37,7 +37,7 @@ if minetest.get_modpath("terumet") then
 		}
 	})
 
-	minetest.register_craft({
+	core.register_craft({
 		output = 'etherium_stuff:torch 4',
 		recipe = {
 			{'ethereal:etherium_dust'},
@@ -47,7 +47,7 @@ if minetest.get_modpath("terumet") then
 	})
 end
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "etherium_stuff:bucket_crystal_water",
 	recipe = {
@@ -55,9 +55,9 @@ minetest.register_craft({
 	},
 	
 })
-if not minetest.get_modpath("technic") then
+if not core.get_modpath("technic") then
 
-	minetest.register_craft({
+	core.register_craft({
 		output = "etherium_stuff:sandstone",
 		recipe = {
 		{"etherium_stuff:sand", "etherium_stuff:sand"},
@@ -65,13 +65,13 @@ if not minetest.get_modpath("technic") then
 		},
 	})
 
-	minetest.register_craft({
+	core.register_craft({
 	output = "etherium_stuff:sand 4",
 	recipe = {
 		{"etherium_stuff:sandstone"},
 	}
 	})
-	minetest.register_craft({
+	core.register_craft({
 	type = "shapeless",
 	output = "etherium_stuff:crystal_glass",
 	recipe = {
@@ -85,7 +85,7 @@ else
 	technic.register_grinder_recipe({input = {"etherium_stuff:sandstone"}, output = "etherium_stuff:sand 2"})
 end
 
-minetest.register_craft({
+core.register_craft({
 	output = "etherium_stuff:sandstone_brick 4",
 	recipe = {
 		{"etherium_stuff:sandstone", "etherium_stuff:sandstone"},
@@ -93,7 +93,7 @@ minetest.register_craft({
 	}
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "etherium_stuff:sandstone_block 9",
 	recipe = {
 		{"etherium_stuff:sandstone", "etherium_stuff:sandstone", "etherium_stuff:sandstone"},
@@ -102,7 +102,7 @@ minetest.register_craft({
 	}
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "etherium_stuff:sand 8",
 	recipe = {
 		{"group:sand", "group:sand", "group:sand"},
@@ -111,15 +111,15 @@ minetest.register_craft({
 	}
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "cooking",
 	output = "etherium_stuff:glass",
 	recipe = "etherium_stuff:sand",
 })
 
-if not minetest.get_modpath("morelights") then
+if not core.get_modpath("morelights") then
 	
-	minetest.register_craft({
+	core.register_craft({
 	output = "etherium_stuff:sandstone_light_block",
 	recipe = {
 	    {"", "etherium_stuff:crystal_glass", ""},
@@ -129,7 +129,7 @@ if not minetest.get_modpath("morelights") then
 	})
 	
 else
-	minetest.register_craft({
+	core.register_craft({
 	output = "etherium_stuff:sandstone_light_block",
 	recipe = {
 	    {"", "etherium_stuff:crystal_glass", ""},

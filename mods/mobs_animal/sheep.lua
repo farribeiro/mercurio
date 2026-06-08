@@ -1,8 +1,17 @@
 
 -- translation and localize function
 
-local S = minetest.get_translator("mobs_animal")
+local S = core.get_translator("mobs_animal")
 local random = math.random
+
+-- should sheep eat grass blocks and mess up the environment?
+
+local eat_gb = core.settings:get_bool("mobs_animal.eat_grass_block")
+local replace_what = { {"group:grass", "air", -1} }
+
+if eat_gb then
+	table.insert(replace_what, {"default:dirt_with_grass", "default:dirt", -2})
+end
 
 -- sheep colour table
 
@@ -71,6 +80,7 @@ for _, col in ipairs(all_colours) do
 	end
 
 	mobs:register_mob("mobs_animal:sheep_" .. col[1], {
+		description = S("@1 Sheep", col[2]),
 		stay_near = {"farming:straw", 10},
 		stepheight = 0.6,
 		type = "animal",
@@ -93,8 +103,7 @@ for _, col in ipairs(all_colours) do
 		walk_velocity = 1,
 		run_velocity = 2,
 		runaway = true,
-		jump = true,
-		jump_height = 6,
+		jump_height = 5,
 		pushable = true,
 		drops = drops_normal,
 		water_damage = 0.01,
@@ -104,6 +113,7 @@ for _, col in ipairs(all_colours) do
 			speed_normal = 15, speed_run = 15,
 			stand_start = 0, stand_end = 80,
 			walk_start = 81, walk_end = 100,
+			run_start = 81, run_end = 100, run_speed = 40,
 			-- no death animation so we'll re-use 2 standing frames at a speed of 1 fps
 			-- and have mob rotate while dying.
 			die_start = 1, die_end = 2, die_speed = 1,
@@ -115,10 +125,7 @@ for _, col in ipairs(all_colours) do
 		},
 		view_range = 8,
 		replace_rate = 10,
-		replace_what = {
-			{"group:grass", "air", -1},
-			{"default:dirt_with_grass", "default:dirt", -2}
-		},
+		replace_what = replace_what,
 		fear_height = 3,
 
 		on_replace = function(self, pos, oldnode, newnode)
@@ -163,7 +170,7 @@ for _, col in ipairs(all_colours) do
 			----------------------------------------------------
 			pos.y = pos.y + 0.5 -- spawn child a little higher
 
-			local mob = minetest.add_entity(pos, parent1.name)
+			local mob = core.add_entity(pos, parent1.name)
 			local ent2 = mob:get_luaentity()
 
 			-- remove horns from parents' texture string, lambs dont have horns
@@ -175,23 +182,9 @@ for _, col in ipairs(all_colours) do
 				textures = parent1.child_texture[1]
 			end
 
-			-- and resize to half height
-			mob:set_properties({
-				textures = {textures},
-				visual_size = {
-					x = parent1.base_size.x * .5, y = parent1.base_size.y * .5
-				},
-				collisionbox = {
-					parent1.base_colbox[1] * .5, parent1.base_colbox[2] * .5,
-					parent1.base_colbox[3] * .5, parent1.base_colbox[4] * .5,
-					parent1.base_colbox[5] * .5, parent1.base_colbox[6] * .5
-				},
-				selectionbox = {
-					parent1.base_selbox[1] * .5, parent1.base_selbox[2] * .5,
-					parent1.base_selbox[3] * .5, parent1.base_selbox[4] * .5,
-					parent1.base_selbox[5] * .5, parent1.base_selbox[6] * .5
-				}
-			})
+			-- set baby mob to half size
+			mobs:scale_mob(ent2, .5, .5)
+			mob:set_properties({textures = {textures}})
 
 			-- tamed and owned by parents' owner
 			ent2.child = true
@@ -269,7 +262,7 @@ for _, col in ipairs(all_colours) do
 			if itemname == "mobs:shears" then
 
 				if self.gotten ~= false or self.child ~= false
-				or name ~= self.owner or not minetest.get_modpath("wool") then
+				or name ~= self.owner or not core.get_modpath("wool") then
 					return
 				end
 
@@ -277,7 +270,7 @@ for _, col in ipairs(all_colours) do
 				self.drops = drops_gotten
 				self.food = 0 -- reset food
 
-				local obj = minetest.add_item(
+				local obj = core.add_item(
 					self.object:get_pos(),
 					ItemStack("wool:" .. col[1] .. " " .. random(3))
 				)
@@ -314,7 +307,7 @@ for _, col in ipairs(all_colours) do
 							local pos = self.object:get_pos()
 
 							-- add new coloured sheep
-							local mob = minetest.add_entity(pos, "mobs_animal:sheep_" .. colr)
+							local mob = core.add_entity(pos, "mobs_animal:sheep_" .. colr)
 							local ent = mob:get_luaentity()
 
 							if ent then
@@ -379,7 +372,7 @@ if not mobs.custom_spawn_animal then
 
 	local max_ht = 400
 	local spawn_on = {"default:dirt_with_grass", "ethereal:green_dirt"}
-	local mod_ethereal = minetest.get_modpath("ethereal")
+	local mod_ethereal = core.get_modpath("ethereal")
 	local spawn_chance = mod_ethereal and 12000 or 8000
 
 	mobs:spawn({
@@ -465,7 +458,7 @@ if not mobs.custom_spawn_animal then
 			random_sheep(pos, true)
 
 			-- Rest of herd
-			local nods = minetest.find_nodes_in_area_under_air(
+			local nods = core.find_nodes_in_area_under_air(
 				{x = pos.x - 4, y = pos.y - 3, z = pos.z - 4},
 				{x = pos.x + 4, y = pos.y + 3, z = pos.z + 4}, spawn_on)
 
@@ -480,7 +473,7 @@ if not mobs.custom_spawn_animal then
 
 					pos2.y = pos2.y + 2
 
-					if minetest.get_node(pos2).name == "air" then
+					if core.get_node(pos2).name == "air" then
 
 						-- Add a sheep or lamb
 						random_sheep(pos2, false)
@@ -497,10 +490,10 @@ mobs:alias_mob("mobs:sheep", "mobs_animal:sheep_white")
 
 -- raw mutton
 
-minetest.register_craftitem(":mobs:mutton_raw", {
+core.register_craftitem(":mobs:mutton_raw", {
 	description = S("Raw Mutton"),
 	inventory_image = "mobs_mutton_raw.png",
-	on_use = minetest.item_eat(2),
+	on_use = core.item_eat(2),
 	groups = {food_meat_raw = 1, food_mutton_raw = 1}
 })
 
@@ -508,16 +501,16 @@ mobs.add_eatable("mobs:mutton_raw", 2)
 
 -- cooked mutton and recipe
 
-minetest.register_craftitem(":mobs:mutton_cooked", {
+core.register_craftitem(":mobs:mutton_cooked", {
 	description = S("Cooked Mutton"),
 	inventory_image = "mobs_mutton_cooked.png",
-	on_use = minetest.item_eat(6),
+	on_use = core.item_eat(6),
 	groups = {food_meat = 1, food_mutton = 1}
 })
 
 mobs.add_eatable("mobs:mutton_cooked", 6)
 
-minetest.register_craft({
+core.register_craft({
 	type = "cooking",
 	output = "mobs:mutton_cooked",
 	recipe = "mobs:mutton_raw",

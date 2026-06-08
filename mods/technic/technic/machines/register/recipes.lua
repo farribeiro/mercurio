@@ -1,6 +1,13 @@
-local have_ui = minetest.get_modpath("unified_inventory")
-local have_cg = minetest.get_modpath("craftguide")
-local have_i3 = minetest.get_modpath("i3")
+local ui_version = core.get_modpath("unified_inventory") and unified_inventory.version
+local cg_version = core.get_modpath("craftguide")
+local i3_version = core.get_modpath("i3")
+
+-- Mod compatibility pre-check.
+if cg_version and (not craftguide.register_craft or not craftguide.register_craft_type) then
+	core.log("warning", "[technic] Unsupported 'craftguide' version.")
+	cg_version = nil
+end
+
 
 technic.recipes = { cooking = { input_size = 1, output_size = 1 } }
 function technic.register_recipe_type(typename, origdata)
@@ -8,20 +15,21 @@ function technic.register_recipe_type(typename, origdata)
 	for k, v in pairs(origdata) do data[k] = v end
 	data.input_size = data.input_size or 1
 	data.output_size = data.output_size or 1
+
+	if ui_version and (unified_inventory.version >= 6 or data.output_size == 1) then
+		unified_inventory.register_craft_type(typename, {
+			description = data.description,
+			width = data.input_size,
+			height = 1,
+		})
+	end
 	if data.output_size == 1 then
-		if have_ui and unified_inventory.register_craft_type then
-			unified_inventory.register_craft_type(typename, {
-				description = data.description,
-				width = data.input_size,
-				height = 1,
-			})
-		end
-		if have_cg and craftguide.register_craft_type then
+		if cg_version then
 			craftguide.register_craft_type(typename, {
 				description = data.description,
 			})
 		end
-		if have_i3 then
+		if i3_version then
 			i3.register_craft_type(typename, {
 				description = data.description,
 			})
@@ -31,6 +39,8 @@ function technic.register_recipe_type(typename, origdata)
 	technic.recipes[typename] = data
 end
 
+--- @brief  Generates a (hopefully) unique hash from the given input items
+--- @return Sorted item names. '/' delimited. e.g. "boo:baz/firstmod:foo/othermod:bar"
 local function get_recipe_index(items)
 	if type(items) ~= "table" then
 		return false
@@ -50,57 +60,84 @@ local function register_recipe(typename, data)
 		data.input[i] = ItemStack(stack):to_string()
 	end
 	if type(data.output) == "table" then
-		for i, v in ipairs(data.output) do
-			data.output[i] = ItemStack(data.output[i]):to_string()
+		for i, stack in ipairs(data.output) do
+			data.output[i] = ItemStack(stack):to_string()
 		end
 	else
 		data.output = ItemStack(data.output):to_string()
 	end
 
-	local recipe = {time = data.time, input = {}, output = data.output}
-	local index = get_recipe_index(data.input)
-	if not index then
-		print("[Technic] ignored registration of garbage recipe!")
-		return
-	end
-	for _, stack in ipairs(data.input) do
-		recipe.input[ItemStack(stack):get_name()] = ItemStack(stack):get_count()
+	local type_def = technic.recipes[typename]
+
+	-- (Try to) add the recipe to the technic-internal recipe list
+	do
+		local recipe = {time = data.time, input = {}, output = data.output}
+		local index = get_recipe_index(data.input)
+		if not index then
+			print("[Technic] ignored registration of garbage recipe!")
+			return
+		end
+
+		-- Convert inputs to the format "default:apple 3"
+		for _, itemstring in ipairs(data.input) do
+			local stack = ItemStack(itemstring)
+			recipe.input[stack:get_name()] = stack:get_count()
+		end
+		type_def.recipes[index] = recipe
 	end
 
-	technic.recipes[typename].recipes[index] = recipe
-	if have_ui and technic.recipes[typename].output_size == 1 then
+	-- For craft guides only supporting 1 output
+	local result_1 = data.output
+	if type(result_1) == "table" then
+		result_1 = result_1[1]
+	end
+
+	-- Add the recipe to the supported craft guides
+	if ui_version then
 		unified_inventory.register_craft({
 			type = typename,
-			output = data.output,
+			output = (ui_version >= 6) and data.output or result_1,
 			items = data.input,
 			width = 0,
 		})
 	end
-	if (have_cg or have_i3) and technic.recipes[typename].output_size == 1 then
-		local result = data.output
-		if type(result) == "table" then
-			result = result[1]
-		end
-		if have_cg and craftguide.register_craft then
+	if type_def.output_size == 1 then
+		if cg_version then
 			craftguide.register_craft({
 				type = typename,
-				result = result,
+				result = result_1,
 				items = data.input,
 			})
 		end
-		if have_i3 then
+		if i3_version then
 			i3.register_craft({
 				type = typename,
-				result = result,
+				result = result_1,
 				items = data.input,
 			})
 		end
 	end
 end
 
+local recipes_to_register = {}
 function technic.register_recipe(typename, data)
-	minetest.after(0.01, register_recipe, typename, data) -- Handle aliases
+	assert(typename)
+	assert(data.input)
+	assert(data.output)
+
+	-- Postpone to handle aliases
+	table.insert(recipes_to_register, {
+		typename,
+		data
+	})
 end
+
+core.register_on_mods_loaded(function()
+	for _, def in ipairs(recipes_to_register) do
+		register_recipe(def[1], def[2])
+	end
+	recipes_to_register = nil
+end)
 
 function technic.get_recipe(typename, items)
 	if typename == "cooking" then -- Already builtin in Minetest, so use that

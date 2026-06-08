@@ -10,7 +10,7 @@ and crops which can be planted directly onto tilled soil without seeds.  Crops t
 require seeds like wheat and cotton are found when digging in long grasses, and will
 require player to stay nearby until they germinate before growing normally.
 
-![screenshot.png](screenshot.png)
+![screenshot.jpg](screenshot.jpg)
 
 Tech information
 ----------------
@@ -21,7 +21,7 @@ Crops grow by adding your new plant to the {growing = 1} group and numbering the
 * "farming:wheat_1"       through to   "farming:wheat_8"
 * "farming:cucumber_1"    through to   "farming:cucumber_4"
 
-https://forum.minetest.net/viewtopic.php?id=9019
+https://forum.luanti.org/viewtopic.php?t=9019
 
 Farming Redo also works with Bonemeal mod for quick growing crops and saplings which can
 be found at https://notabug.org/TenPlus1/bonemeal
@@ -31,7 +31,7 @@ be found at https://notabug.org/TenPlus1/bonemeal
 * default
 * mcl_core, mcl_sounds, mcl_farming, mcl_stairs
 * stairs
-* lucky_block (adds 47 lucky blocks)
+* lucky_block (adds 49 lucky blocks)
 * toolranks
 
 #### Configuration
@@ -217,7 +217,8 @@ on an older map are enabled and growing properly.
 
 ### Changelog:
 
-- 1.49 - Added {eatable=1} groups to food items with the value giving HP when eaten, improved mineclone support, separated foods from crop files., hoes can deal damage.
+- 1.50 - Add 'farming_floodable_crops' setting so that crops will drop when flooded.
+- 1.49 - Added {eatable=1} groups to food items with the value giving HP when eaten, improved mineclone support, separated foods from crop files, hoes can deal damage. Add weed and weed bale (with setting to disable weed growth).
 - 1.48 - added 'farming_use_utensils' setting to enable/disable utensils in recipes, added mayonnaise (thx felfa), added gingerbread man, Added MineClone2 compatibility
 - 1.47 - Now blueberries can make blue dye, tweak soil types to work better with older 0.4.x clients and add spanish translation (thx mckaygerhard), add trellis setting to registered_crops and fix pea and soy crop names (thx nixnoxus), add strawberries if ethereal mod not active, added asparagus; spinach; eggplant (thx Atlante for new textures), Sugar Cube
 - 1.46 - Added min/max default light settings, added lettuce and blackberries with food items (thanks OgelGames), added soya, vanilla and sunflowers (thanks Felfa), added tofu, added salt crystals (thanks gorlock)

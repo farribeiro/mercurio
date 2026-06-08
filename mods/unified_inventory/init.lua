@@ -1,18 +1,17 @@
 -- Unified Inventory
 
-if not minetest.features.formspec_version_element then
+if not core.features.formspec_version_element then
 	-- At least formspec_version[] is the minimal feature requirement
-	error("Unified Inventory requires Minetest version 5.4.0 or newer.\n" ..
-		" Please update Minetest or use an older version of Unified Inventory.")
+	error("Unified Inventory requires Luanti version 5.4.0 or newer.\n" ..
+		" Please update Luanti or use an older version of Unified Inventory.")
 end
 
-local modpath = minetest.get_modpath(minetest.get_current_modname())
-local worldpath = minetest.get_worldpath()
+local modpath = core.get_modpath(core.get_current_modname())
+local worldpath = core.get_worldpath()
 
 -- Data tables definitions
 unified_inventory = {
 	activefilter = {},
-	active_search_direction = {},
 	alternate = {},
 	current_page = {},
 	current_searchbox = {},
@@ -40,22 +39,19 @@ unified_inventory = {
 	-- Default inventory page
 	default = "craft",
 
-	-- "Lite" mode
-	lite_mode = minetest.settings:get_bool("unified_inventory_lite"),
-
 	-- Items automatically added to categories based on item definitions
-	automatic_categorization = (minetest.settings:get_bool("unified_inventory_automatic_categorization") ~= false),
+	automatic_categorization = (core.settings:get_bool("unified_inventory_automatic_categorization") ~= false),
 
 	-- Trash enabled
-	trash_enabled = (minetest.settings:get_bool("unified_inventory_trash") ~= false),
+	trash_enabled = (core.settings:get_bool("unified_inventory_trash") ~= false),
 	imgscale = 1.25,
 	list_img_offset = 0.13,
-	standard_background = "bgcolor[#0000]background9[0,0;1,1;ui_formbg_9_sliced.png;true;16]",
+	standard_background = (
+		"bgcolor[#0000]" ..
+		"background9[0,0;1,1;ui_formbg_9_sliced.png;true;16]"
+	),
 
-	hide_disabled_buttons = minetest.settings:get_bool("unified_inventory_hide_disabled_buttons", false),
-	hide_uncraftable_items = minetest.settings:get_bool("unified_inventory_hide_uncraftable_items", false),
-
-	version = 5
+	version = 7
 }
 
 local ui = unified_inventory
@@ -100,6 +96,7 @@ ui.style_full = {
 	-- Generic sizes
 	btn_spc = 0.85,
 	btn_size = 0.75,
+	-- "main" inventory list position
 	std_inv_x = 0.3,
 	std_inv_y = 5.75,
 }
@@ -141,6 +138,7 @@ ui.style_lite = {
 	-- Generic sizes
 	btn_spc = 0.8,
 	btn_size = 0.7,
+	-- "main" inventory list position
 	std_inv_x = 0.1,
 	std_inv_y = 4.6,
 }
@@ -181,6 +179,7 @@ if sfinv then
 	sfinv.enabled = false
 end
 
+dofile(modpath.."/settings.lua")
 dofile(modpath.."/group.lua")
 dofile(modpath.."/category.lua")
 dofile(modpath.."/default-categories.lua")
@@ -189,13 +188,15 @@ dofile(modpath.."/callbacks.lua")
 dofile(modpath.."/match_craft.lua")
 dofile(modpath.."/register.lua")
 
-if minetest.settings:get_bool("unified_inventory_bags") ~= false then
+if core.settings:get_bool("unified_inventory_bags") ~= false then
 	dofile(modpath.."/bags.lua")
 end
-if minetest.settings:get_bool("unified_inventory_item_names") ~= false then
+if core.settings:get_bool("unified_inventory_item_names") ~= false then
 	dofile(modpath.."/item_names.lua")
 end
-if minetest.settings:get_bool("unified_inventory_waypoints") ~= false then
+if core.settings:get_bool("unified_inventory_waypoints") ~= false then
 	dofile(modpath.."/waypoints.lua")
 end
 dofile(modpath.."/legacy.lua") -- mod compatibility
+
+--dofile(modpath.."/unittests.lua") -- For development purposes only!

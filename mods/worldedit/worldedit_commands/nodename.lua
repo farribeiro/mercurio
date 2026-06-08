@@ -1,6 +1,4 @@
--- Strips any kind of escape codes (translation, colors) from a string
--- https://github.com/minetest/minetest/blob/53dd7819277c53954d1298dfffa5287c306db8d0/src/util/string.cpp#L777
-local function strip_escapes(input)
+local strip_escapes = minetest.strip_escapes or function(input)
 	local s = function(idx) return input:sub(idx, idx) end
 	local out = ""
 	local i = 1
@@ -22,42 +20,63 @@ local function strip_escapes(input)
 		end
 		i = i + 1
 	end
-	--print(("%q -> %q"):format(input, out))
 	return out
 end
 
 local function string_endswith(full, part)
-	return full:find(part, 1, true) == #full - #part + 1
+	if #full < #part then
+		return false
+	end
+	return full:sub(-#part) == part
+end
+
+local function make_description_cache()
+	local t = {}
+	for key, def in pairs(minetest.registered_nodes) do
+		local desc = def.short_description or (def.description or ""):gsub("\n.*", "", 1)
+		desc = strip_escapes(desc):lower()
+		if def.groups.not_in_creative_inventory ~= 1 and desc ~= "" then
+			t[key] = desc
+		end
+	end
+	return t
 end
 
 local description_cache = nil
 
 -- normalizes node "description" `nodename`, returning a string (or nil)
 worldedit.normalize_nodename = function(nodename)
-	nodename = nodename:gsub("^%s*(.-)%s*$", "%1") -- strip spaces
-	if nodename == "" then return nil end
-
-	local fullname = ItemStack({name=nodename}):get_name() -- resolve aliases
-	if minetest.registered_nodes[fullname] or fullname == "air" then -- full name
-		return fullname
+	nodename = nodename:trim()
+	if nodename == "" then
+		return nil
 	end
-	nodename = nodename:lower()
 
+	if nodename:find(" ", 1, true) == nil then
+		local fullname = ItemStack({name=nodename}):get_name() -- resolve aliases
+		if minetest.registered_nodes[fullname] then -- full name
+			return fullname
+		end
+	end
+
+	local match
 	for key, _ in pairs(minetest.registered_nodes) do
-		if string_endswith(key:lower(), ":" .. nodename) then -- matches name (w/o mod part)
-			return key
+		if string_endswith(key, ":" .. nodename) then
+			if match then
+				match = nil
+				break
+			end
+			match = key -- matches name w/o mod part (only if unique)
 		end
 	end
+	if match then
+		return match
+	end
 
+	nodename = nodename:lower()
 	if description_cache == nil then
-		-- cache stripped descriptions
-		description_cache = {}
-		for key, value in pairs(minetest.registered_nodes) do
-			local desc = strip_escapes(value.description):gsub("\n.*", "", 1):lower()
-			if desc ~= "" then
-				description_cache[key] = desc
-			end
-		end
+		-- Note: since we don't handle translations this will work only in the original
+		-- language of the description (English)
+		description_cache = make_description_cache()
 	end
 
 	for key, desc in pairs(description_cache) do
@@ -72,14 +91,16 @@ worldedit.normalize_nodename = function(nodename)
 		end
 	end
 
-	local match = nil
+	match = nil
 	for key, value in pairs(description_cache) do
 		if value:find(nodename, 1, true) ~= nil then
-			if match ~= nil then
-				return nil
+			if match then
+				match = nil
+				break
 			end
-			match = key -- substring description match (only if no ambiguities)
+			match = key -- substring description match (only if unique)
 		end
 	end
+
 	return match
 end

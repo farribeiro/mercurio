@@ -1,10 +1,10 @@
 currency.barter = {}
 barter = currency.barter -- Kept as a global variable for compatibility
 
-local S = minetest.get_translator("currency")
+local S = core.get_translator("currency")
 
 barter.chest = {}
-barter.chest.expire_after = tonumber(minetest.settings:get('barter.chest.expireafter')) or 15 * 60
+barter.chest.expire_after = tonumber(core.settings:get('barter.chest.expireafter')) or 15 * 60
 barter.chest.formspec = {
 	main = "size[8,9]"..
 		"list[current_name;pl1;0,0;3,4;]"..
@@ -65,13 +65,13 @@ barter.chest.update_formspec = function(meta)
 end
 
 barter.chest.give_inventory = function(inv,list,playername)
-	local player = minetest.get_player_by_name(playername)
+	local player = core.get_player_by_name(playername)
 	if player then
 		for _,v in ipairs(inv:get_list(list)) do
 			if player:get_inventory():room_for_item("main",v) then
 				player:get_inventory():add_item("main",v)
 			else
-				minetest.add_item(player:get_pos(),v)
+				core.add_item(player:get_pos(),v)
 			end
 			inv:remove_item(list,v)
 		end
@@ -103,12 +103,12 @@ end
 barter.chest.start_timer = function(pos, meta)
 	meta:set_int("clean",0)
 	meta:set_int("timer",0)
-	local node_timer = minetest.get_node_timer(pos)
+	local node_timer = core.get_node_timer(pos)
 	if node_timer:is_started() then return end
 	node_timer:start(22)
 end
 
-minetest.register_node("currency:barter", {
+core.register_node("currency:barter", {
 	drawtype = "nodebox",
 	description = S("Barter Table"),
 	paramtype = "light",
@@ -133,7 +133,7 @@ minetest.register_node("currency:barter", {
 	is_ground_content = false,
 	sounds = currency.node_sound_wood_defaults(),
 	on_construct = function(pos)
-		local meta = minetest.get_meta(pos)
+		local meta = core.get_meta(pos)
 		meta:set_string("infotext", S("Barter Table"))
 		meta:set_string("pl1","")
 		meta:set_string("pl2","")
@@ -145,7 +145,7 @@ minetest.register_node("currency:barter", {
 		inv:set_size("pl2", 12) -- 3*4
 	end,
 	on_receive_fields = function(pos, formname, fields, sender)
-		local meta = minetest.get_meta(pos)
+		local meta = core.get_meta(pos)
 		barter.chest.start_timer(pos, meta)
 		local pl_receive_fields = function(n)
 			if fields[n.."_start"] and meta:get_string(n) == "" then
@@ -173,26 +173,26 @@ minetest.register_node("currency:barter", {
 		barter.chest.update_formspec(meta)
 	end,
 	allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		local meta = minetest.get_meta(pos)
+		local meta = core.get_meta(pos)
 		barter.chest.start_timer(pos, meta)
 		if not barter.chest.check_privilege(from_list,player:get_player_name(),meta) then return 0 end
 		if not barter.chest.check_privilege(to_list,player:get_player_name(),meta) then return 0 end
 		return count
 	end,
 	allow_metadata_inventory_put = function(pos, listname, index, stack, player)
-		local meta = minetest.get_meta(pos)
+		local meta = core.get_meta(pos)
 		barter.chest.start_timer(pos, meta)
 		if not barter.chest.check_privilege(listname,player:get_player_name(),meta) then return 0 end
 		return stack:get_count()
 	end,
 	allow_metadata_inventory_take = function(pos, listname, index, stack, player)
-		local meta = minetest.get_meta(pos)
+		local meta = core.get_meta(pos)
 		barter.chest.start_timer(pos, meta)
 		if not barter.chest.check_privilege(listname,player:get_player_name(),meta) then return 0 end
 		return stack:get_count()
 	end,
 	on_timer = function(pos, dtime)
-		local meta = minetest.get_meta(pos)
+		local meta = core.get_meta(pos)
 		if 1 == meta:get_int("clean") then return false end
 
 		local timer = meta:get_int("timer")

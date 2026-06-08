@@ -260,14 +260,14 @@ minetest.register_craftitem("animalia:poultry_raw", {
 	description = "Raw Poultry",
 	inventory_image = "animalia_poultry_raw.png",
 	on_use = minetest.item_eat(1),
-	groups = {flammable = 2, meat = 1, food_meat = 1},
+	groups = {flammable = 2, meat = 1, food_meat = 1, food_chicken_raw = 1},
 })
 
 minetest.register_craftitem("animalia:poultry_cooked", {
 	description = "Cooked Poultry",
 	inventory_image = "animalia_poultry_cooked.png",
 	on_use = minetest.item_eat(6),
-	groups = {flammable = 2, meat = 1, food_meat = 1},
+	groups = {flammable = 2, meat = 1, food_meat = 1, food_chicken_cooked = 1},
 })
 
 minetest.register_craft({
@@ -313,6 +313,44 @@ register_egg("animalia:song_bird_egg", {
 	inventory_image = "animalia_song_bird_egg",
 	mob = "animalia:bird"
 })
+
+-- Hunger support --
+
+if minetest.get_modpath("hunger_ng") then
+	hunger_ng.add_hunger_data("animalia:beef_raw", {satiates = 1, heals = -1})
+	hunger_ng.add_hunger_data("animalia:beef_cooked", {satiates = 8})
+	hunger_ng.add_hunger_data("animalia:mutton_raw", {satiates = 1, heals = -1})
+	hunger_ng.add_hunger_data("animalia:mutton_cooked", {satiates = 6})
+	hunger_ng.add_hunger_data("animalia:rat_raw", {satiates = 1, heals = -2})
+	hunger_ng.add_hunger_data("animalia:rat_cooked", {satiates = 4})
+	hunger_ng.add_hunger_data("animalia:porkchop_raw", {satiates = 1, heals = -1})
+	hunger_ng.add_hunger_data("animalia:porkchop_cooked", {satiates = 8})
+	hunger_ng.add_hunger_data("animalia:poultry_raw", {satiates = 1, heals = -1})
+	hunger_ng.add_hunger_data("animalia:poultry_cooked", {satiates = 3})
+	hunger_ng.add_hunger_data("animalia:venison_raw", {satiates = 1, heals = -2})
+	hunger_ng.add_hunger_data("animalia:venison_cooked", {satiates = 8})
+	hunger_ng.add_hunger_data("animalia:chicken_egg_fried", {satiates = 4})
+	hunger_ng.add_hunger_data("animalia:song_bird_egg_fried", {satiates = 4})
+	hunger_ng.add_hunger_data("animalia:turkey_egg_fried", {satiates = 4})
+end
+
+if minetest.get_modpath("hbhunger") then
+	hbhunger.register_food("animalia:beef_raw", 1, "", 0, -1)
+	hbhunger.register_food("animalia:beef_cooked", 12)
+	hbhunger.register_food("animalia:mutton_raw", 1, "", 0, -1)
+	hbhunger.register_food("animalia:mutton_cooked", 9)
+	hbhunger.register_food("animalia:rat_raw", 1, "", 0, -1)
+	hbhunger.register_food("animalia:rat_cooked", 6)
+	hbhunger.register_food("animalia:porkchop_raw", 1, "", 0, -1)
+	hbhunger.register_food("animalia:porkchop_cooked", 12)
+	hbhunger.register_food("animalia:poultry_raw", 1, "", 0, -1)
+	hbhunger.register_food("animalia:poultry_cooked", 9)
+	hbhunger.register_food("animalia:venison_raw", 1, "", 0, -1)
+	hbhunger.register_food("animalia:venison_cooked", 12)
+	hbhunger.register_food("animalia:chicken_egg_fried", 6)
+	hbhunger.register_food("animalia:song_bird_egg_fried", 6)
+	hbhunger.register_food("animalia:turkey_egg_fried", 6)
+end
 
 ----------
 -- Misc --

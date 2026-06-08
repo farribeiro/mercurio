@@ -1,8 +1,8 @@
 
 -- translation and hairball setting
 
-local S = minetest.get_translator("mobs_animal")
-local hairball = minetest.settings:get_bool("mobs_animal.hairball") ~= false
+local S = core.get_translator("mobs_animal")
+local hairball = core.settings:get_bool("mobs_animal.hairball") ~= false
 
 -- custom kitty types
 
@@ -16,6 +16,7 @@ local kitten_types = {
 -- Kitten by Jordach / BFD
 
 mobs:register_mob("mobs_animal:kitten", {
+	description = S("Kitten"),
 	stepheight = 0.6,
 	type = "animal",
 	specific_attack = {"mobs_animal:rat"},
@@ -45,7 +46,6 @@ mobs:register_mob("mobs_animal:kitten", {
 	walk_chance = 15,
 	run_velocity = 2,
 	runaway = true,
-	jump = false,
 	drops = {
 		{name = "farming:string", chance = 1, min = 0, max = 1}
 	},
@@ -56,10 +56,11 @@ mobs:register_mob("mobs_animal:kitten", {
 		speed_normal = 42,
 		stand_start = 97, stand_end = 192,
 		walk_start = 0, walk_end = 96,
+		run_start = 0, run_end = 96, run_speed = 50,
 		stoodup_start = 0, stoodup_end = 0,
 	},
 	follow = {
-		"mobs_animal:rat", "group:food_fish_raw",
+		"mobs_animal:rat", "group:food_fish_raw", "mobs:glass_milk",
 		"mobs_fish:tropical", "mobs_fish:clownfish", "xocean:fish_edible"
 	},
 	view_range = 8,
@@ -74,7 +75,7 @@ mobs:register_mob("mobs_animal:kitten", {
 
 			tmp = kitten_types[n]
 
-			if minetest.find_node_near(pos, 1, tmp.nodes) then
+			if core.find_node_near(pos, 1, tmp.nodes) then
 
 				self.base_texture = tmp.skins
 				self.object:set_properties({textures = tmp.skins})
@@ -88,7 +89,24 @@ mobs:register_mob("mobs_animal:kitten", {
 
 	on_rightclick = function(self, clicker)
 
-		if mobs:feed_tame(self, clicker, 4, true, true) then return end
+		-- what are we holding?
+		local tool = clicker:get_wielded_item()
+		local item = tool and tool:get_name()
+
+		if mobs:feed_tame(self, clicker, 4, true, true) then
+
+			-- return empty glass if kitten drinks a glass of milk
+			if item == "mobs:glass_milk" and core.get_modpath("vessels")
+			and not mobs.is_creative(clicker:get_player_name()) then
+
+				local pos = self.object:get_pos()
+
+				core.add_item(pos, "vessels:drinking_glass")
+			end
+
+			return
+		end
+
 		if mobs:protect(self, clicker) then return end
 		if mobs:capture_mob(self, clicker, 50, 50, 90, false, nil) then return end
 
@@ -119,10 +137,9 @@ mobs:register_mob("mobs_animal:kitten", {
 
 		local pos = self.object:get_pos()
 
-		minetest.add_item(pos, "mobs:hairball")
+		core.add_item(pos, "mobs:hairball")
 
-		minetest.sound_play("default_dig_snappy", {
-				pos = pos, gain = 1.0, max_hear_distance = 5}, true)
+		core.sound_play("default_dig_snappy", {pos = pos, max_hear_distance = 5}, true)
 	end
 })
 
@@ -132,7 +149,7 @@ if not mobs.custom_spawn_animal then
 
 	local spawn_on = "default:dirt_with_grass"
 
-	if minetest.get_modpath("ethereal") then
+	if core.get_modpath("ethereal") then
 		spawn_on = "ethereal:grove_dirt"
 	end
 
@@ -170,7 +187,7 @@ local hairball_items = {
 	"ethereal:fish_tetra"
 }
 
-minetest.register_craftitem(":mobs:hairball", {
+core.register_craftitem(":mobs:hairball", {
 	description = S("Hairball"),
 	inventory_image = "mobs_hairball.png",
 
@@ -181,12 +198,12 @@ minetest.register_craftitem(":mobs:hairball", {
 		local newpos = {x = pos.x + dir.x, y = pos.y + dir.y + 1.5, z = pos.z + dir.z}
 		local item = hairball_items[math.random(1, #hairball_items)]
 
-		if item ~= "" and minetest.registered_items[item] then
-			minetest.add_item(newpos, {name = item})
+		if item ~= "" and core.registered_items[item] then
+			core.add_item(newpos, {name = item})
 		end
 
-		minetest.sound_play("default_place_node_hard", {
-				pos = newpos, gain = 1.0, max_hear_distance = 5}, true)
+		core.sound_play("default_place_node_hard", {
+				pos = newpos, max_hear_distance = 5}, true)
 
 		itemstack:take_item()
 

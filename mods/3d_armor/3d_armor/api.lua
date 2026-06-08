@@ -108,18 +108,16 @@ local armor_textures = setmetatable({}, {
 	end
 })
 
-armor = {
+local armor_fields = {
 	timer = 0,
 	elements = {"head", "torso", "legs", "feet"},
 	physics = {"jump", "speed", "gravity"},
 	attributes = {"heal", "fire", "water", "feather"},
-	formspec = "image[2.5,0;2,4;armor_preview]"..
-		default.gui_bg..
-		default.gui_bg_img..
-		default.gui_slots..
-		default.get_hotbar_bg(0, 4.7)..
-		"list[current_player;main;0,4.7;8,1;]"..
-		"list[current_player;main;0,5.85;8,3;8]",
+	formspec = (
+		"image[2.5,0;2,4;armor_preview]" ..
+		armor.add_formspec_list("current_player", "main", 0, 4.7, 8, 1) ..
+		armor.add_formspec_list("current_player", "main", 0, 5.85, 8, 3, 8)
+	),
 	def = armor_def,
 	textures = armor_textures,
 	default_skin = "character",
@@ -134,18 +132,19 @@ armor = {
 		crystal = "ethereal:crystal_ingot",
 		nether = "nether:nether_ingot",
 	},
+	-- damage node = fire protection level required
 	fire_nodes = {
-		{"nether:lava_source",      5, 8},
-		{"default:lava_source",     5, 8},
-		{"default:lava_flowing",    5, 8},
-		{"fire:basic_flame",        3, 4},
-		{"fire:permanent_flame",    3, 4},
-		{"ethereal:crystal_spike",  2, 1},
-		{"ethereal:fire_flower",    2, 1},
-		{"nether:lava_crust",       2, 1},
-		{"default:torch",           1, 1},
-		{"default:torch_ceiling",   1, 1},
-		{"default:torch_wall",      1, 1},
+		["nether:lava_source"] = 5,
+		["default:lava_source"] = 5,
+		["default:lava_flowing"] = 5,
+		["fire:basic_flame"] = 3,
+		["fire:permanent_flame"] = 3,
+		["ethereal:crystal_spike"] = 2,
+		["ethereal:fire_flower"] = 2,
+		["nether:lava_crust"] = 2,
+		["default:torch"] = 1,
+		["default:torch_ceiling"] = 1,
+		["default:torch_wall"] = 1,
 	},
 	registered_groups = {["fleshy"]=100},
 	registered_callbacks = {
@@ -156,9 +155,12 @@ armor = {
 		on_destroy = {},
 	},
 	migrate_old_inventory = true,
-  version = "0.4.13",
   get_translator = S
 }
+
+for k, v in pairs(armor_fields) do
+	armor[k] = v
+end
 
 armor.config = {
 	init_delay = 2,
@@ -180,8 +182,8 @@ armor.config = {
 	set_elements = "head torso legs feet shield",
 	set_multiplier = 1.1,
 	water_protect = true,
-	fire_protect = minetest.get_modpath("ethereal") ~= nil,
-	fire_protect_torch = minetest.get_modpath("ethereal") ~= nil,
+	fire_protect = minetest.settings:get_bool("armor_fire_protect") ~= false,
+	fire_protect_torch = minetest.settings:get_bool("armor_fire_protect_torch"),
 	feather_fall = true,
 	punch_damage = true,
 }
@@ -419,14 +421,22 @@ armor.set_player_armor = function(self, player)
 				end
 			end
 			local item = stack:get_name()
-			local tex = def.texture or item:gsub("%:", "_")
-			tex = tex:gsub(".png$", "")
-			local prev = def.preview or tex.."_preview"
-			prev = prev:gsub(".png$", "")
-			if not transparent_armor then
-				texture = texture.."^"..tex..".png"
+			local tex
+			-- Allow empty texture names for convenience
+			if def.texture ~= "" then
+				tex = def.texture or item:gsub("%:", "_")
+				tex = tex:gsub(".png$", "")
 			end
-			preview = preview.."^"..prev..".png"
+			if def.preview ~= "" then
+				local prev = def.preview or tex and tex.."_preview"
+				if prev then
+					prev = prev:gsub(".png$", "")
+					preview = preview.."^"..prev..".png"
+				end
+			end
+			if not transparent_armor and tex then
+				texture = texture .. "^" .. tex .. ".png"
+			end
 			state = state + stack:get_wear()
 			count = count + 1
 			for _, phys in pairs(self.physics) do
@@ -679,26 +689,31 @@ armor.equip = function(self, player, itemstack)
     local name, armor_inv = self:get_valid_player(player, "[equip]")
     local armor_element = self:get_element(itemstack:get_name())
 	if name and armor_element then
-		local index
-		for i=1, armor_inv:get_size("armor") do
-			local stack = armor_inv:get_stack("armor", i)
+		local index, old_stack
+		for i, stack in ipairs(armor_inv:get_list("armor")) do
 			if self:get_element(stack:get_name()) == armor_element then
-				--prevents equiping an armor that would unequip a cursed armor.
+				-- prevents equiping an armor that would unequip a cursed armor.
 				if minetest.get_item_group(stack:get_name(), "cursed") ~= 0 then
 					return itemstack
 				end
 				index = i
-				self:unequip(player, armor_element)
+				old_stack = stack
+				self:run_callbacks("on_unequip", player, i, stack)
 				break
 			elseif not index and stack:is_empty() then
 				index = i
 			end
 		end
-		local stack = itemstack:take_item()
-		armor_inv:set_stack("armor", index, stack)
-		self:run_callbacks("on_equip", player, index, stack)
+		if not index then -- armor inventory is full with other armor elements
+			return itemstack
+		end
+		-- Swap the stack at 'index' with 'itemstack'
+		armor_inv:set_stack("armor", index, itemstack)
+		self:run_callbacks("on_equip", player, index, itemstack)
 		self:set_player_armor(player)
 		self:save_armor_inventory(player)
+		-- Remainder: the previous slot content
+		return old_stack or ItemStack()
 	end
 	return itemstack
 end

@@ -1,8 +1,12 @@
-local S = minetest.get_translator("lavalamp")
+local S = core.get_translator("lavalamp")
+
+if unifieddyes and not unifieddyes.preserve_metadata then
+	error("Incompatible version of unifieddyes found. Please update it to the latest version.")
+end
 
 lavalamp = {}
 
-minetest.register_node("lavalamp:lavalamp", {
+core.register_node("lavalamp:lavalamp", {
 	description = S("Lava Lamp/Light"),
 	drawtype = "mesh",
 	mesh = "lavalamp.obj",
@@ -40,15 +44,15 @@ minetest.register_node("lavalamp:lavalamp", {
 		key = "node_sound_glass_defaults",
 	},
 	on_construct = unifieddyes.on_construct,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		node.name = "lavalamp:lavalamp_off"
-		minetest.swap_node(pos, node)
+		core.swap_node(pos, node)
 		return itemstack
 	end
 })
 
-minetest.register_node("lavalamp:lavalamp_off", {
+core.register_node("lavalamp:lavalamp_off", {
 	description = S("Lava Lamp/Light (off)"),
 	drawtype = "mesh",
 	mesh = "lavalamp.obj",
@@ -74,7 +78,7 @@ minetest.register_node("lavalamp:lavalamp_off", {
 	on_construct = unifieddyes.on_construct,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		node.name = "lavalamp:lavalamp"
-		minetest.swap_node(pos, node)
+		core.swap_node(pos, node)
 		return itemstack
 	end,
 	drop = {
@@ -84,7 +88,7 @@ minetest.register_node("lavalamp:lavalamp_off", {
 	}
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "lavalamp:lavalamp",
 	recipe = {
 		{"", homedecor.materials.wool_white, "", },
@@ -121,7 +125,7 @@ for _, color in ipairs(colors) do
 	table.insert(lavalamp.old_static_nodes, "lavalamp:"..color.."_off")
 end
 
-minetest.register_lbm({
+core.register_lbm({
 	name = "lavalamp:convert",
 	label = "Convert lava lamps to use param2 color",
 	run_at_every_load = false,
@@ -146,8 +150,8 @@ minetest.register_lbm({
 
 		local paletteidx, _ = unifieddyes.getpaletteidx("unifieddyes:"..color, "extended")
 
-		minetest.set_node(pos, { name = "lavalamp:lavalamp", param2 = paletteidx })
-		local meta = minetest.get_meta(pos)
+		core.set_node(pos, { name = "lavalamp:lavalamp", param2 = paletteidx })
+		local meta = core.get_meta(pos)
 		meta:set_string("dye", "unifieddyes:"..color)
 
 	end

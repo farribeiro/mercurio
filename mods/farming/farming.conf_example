@@ -17,13 +17,11 @@ farming.corn = 0.002
 farming.coffee = 0.002
 farming.melon = 0.009
 farming.pumpkin = 0.009
-farming.cocoa = true -- true or false only
 farming.raspberry = 0.002
 farming.blueberry = 0.002
 farming.rhubarb = 0.002
 farming.beans = 0.002
 farming.grapes = 0.002
-farming.barley = true -- true or false only
 farming.chili = 0.003
 farming.hemp = 0.003
 farming.garlic = 0.002
@@ -43,8 +41,12 @@ farming.parsley = 0.002
 farming.sunflower = 0.002
 farming.ginger = 0.002
 farming.cotton = 0.003
+farming.kiwi = 0.001
 farming.strawberry = 0.002
-farming.grains = true -- true or false only
+
+farming.cocoa = true -- true or false only for these settings
+farming.barley = true
+farming.grains = true
 farming.rice = true
 
 -- default minimum and maximum light levels crops need to grow

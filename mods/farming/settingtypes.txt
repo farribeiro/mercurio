@@ -2,3 +2,50 @@
 farming_stage_length (Farming Stage Length) float 160.0
 
 farming_use_utensils (Use utensil recipes) bool true
+
+farming_disable_weeds (Disable Weed growth) bool false
+
+farming_floodable_crops (Crops will drop when flooded) bool false
+
+farming_artichoke (Artichoke spawn ratio, 0 to disable) float 0.002
+farming_asparagus (Asparagus spawn ratio, 0 to disable) float 0.002
+farming_beans (Beans spawn ratio, 0 to disable) float 0.002
+farming_beetroot (Beetroot spawn ratio, 0 to disable) float 0.002
+farming_blackberry (Blackberry spawn ratio, 0 to disable) float 0.002
+farming_blueberry (Blueberry spawn ratio, 0 to disable) float 0.002
+farming_cabbage (Cabbage spawn ratio, 0 to disable) float 0.002
+farming_carrot (Carrot spawn ratio, 0 to disable) float 0.002
+farming_chili (Chili spawn ratio, 0 to disable) float 0.003
+farming_coffee (Coffee spawn ratio, 0 to disable) float 0.002
+farming_corn (Corn spawn ratio, 0 to disable) float 0.002
+farming_cotton (Wild Cotton spawn ratio) float 0.003
+farming_cucumber (Cucumber spawn ratio, 0 to disable) float 0.002
+farming_eggplant (Eggplant spawn ratio, 0 to disable) float 0.002
+farming_garlic (Garlic spawn ratio, 0 to disable) float 0.002
+farming_ginger (Ginger spawn ratio, 0 to disable) float 0.002
+farming_grapes (Grapes spawn ratio, 0 to disable) float 0.002
+farming_hemp (Hemp spawn ratio, 0 to disable) float 0.003
+farming_kiwi (Kiwi spawn ratio, 0 to disable) float 0.001
+farming_lettuce (Lettuce spawn ratio, 0 to disable) float 0.002
+farming_melon (Melon spawn ratio, 0 to disable) float 0.009
+farming_mint (Mint spawn ratio, 0 to disable) float 0.005
+farming_onion (Onion spawn ratio, 0 to disable) float 0.002
+farming_parsley (Parsley spawn ratio, 0 to disable) float 0.002
+farming_peas (Peas spawn ratio, 0 to disable) float 0.002
+farming_pepper (Pepper spawn ratio, 0 to disable) float 0.002
+farming_pineapple (Pineapple spawn ratio, 0 to disable) float 0.003
+farming_potato (Potato spawn ratio, 0 to disable) float 0.002
+farming_pumpkin (Pumpkin spawn ratio, 0 to disable) float 0.009
+farming_raspberry (Raspberry spawn ratio, 0 to disable) float 0.002
+farming_rhubarb (Rhubarb spawn ratio, 0 to disable) float 0.002
+farming_soy (Soy spawn ratio, 0 to disable) float 0.002
+farming_spinach (Spinach spawn ratio, 0 to disable) float 0.002
+farming_strawberry (Strawberry spawn ratio, 0 to disable) float 0.002
+farming_sunflower (Sunflower spawn ratio, 0 to disable) float 0.002
+farming_tomato (Tomato spawn ratio, 0 to disable) float 0.002
+farming_vanilla (Vanilla spawn ratio, 0 to disable) float 0.002
+
+farming_barley (Enable Barley) bool true
+farming_cocoa (Enable Cocoa) bool true
+farming_grains (Enable Grains) bool true
+farming_rice (Enable Rice) bool true

@@ -2,6 +2,8 @@
 -- Mount API --
 ---------------
 
+local S = draconis.S
+
 draconis.mounted_player_data = {}
 
 local abs = math.abs
@@ -180,14 +182,16 @@ function draconis.attach_player(self, player)
 	if not self.attack_stamina then
 		return
 	end
-	local data = draconis.mounted_player_data[player:get_player_name()]
+	local player_name = player:get_player_name()
+	local data = draconis.mounted_player_data[player_name] or {}
+
 	if not data.huds then
 		local health = self.hp / math.ceil(self.max_health * scale) * 100
 		local hunger = self.hunger / math.ceil(self.max_hunger * scale) * 100
 		local stamina = self.flight_stamina / 900 * 100
 		local breath = self.attack_stamina / 100 * 100
 		player:hud_set_flags({wielditem = false})
-		draconis.mounted_player_data[player:get_player_name()].huds = {
+		data.huds = {
 			["health"] = set_hud(player, {
 				text = "draconis_forms_health_bg.png^[lowpart:" .. health .. ":draconis_forms_health_fg.png",
 				position = {x = 0, y = 0.7}
@@ -205,6 +209,7 @@ function draconis.attach_player(self, player)
 				position = {x = 0, y = 1}
 			})
 		}
+		draconis.mounted_player_data[player_name] = data
 	end
 end
 
@@ -229,14 +234,16 @@ function draconis.attach_passenger(self, player)
 	-- Set Dragon Data
 	self.passenger = player
 	-- Set HUD
-	local data = draconis.mounted_player_data[player:get_player_name()]
+	local player_name = player:get_player_name()
+	local data = draconis.mounted_player_data[player_name] or {}
+
 	if not data.huds then
 		local health = self.hp / math.ceil(self.max_health * scale) * 100
 		local hunger = self.hunger / math.ceil(self.max_hunger * scale) * 100
 		local stamina = self.flight_stamina / 900 * 100
 		local breath = self.attack_stamina / 100 * 100
 		player:hud_set_flags({wielditem = false})
-		draconis.mounted_player_data[player:get_player_name()].huds = {
+		data.huds = {
 			["health"] = set_hud(player, {
 				text = "draconis_forms_health_bg.png^[lowpart:" .. health .. ":draconis_forms_health_fg.png",
 				position = {x = 0, y = 0.7}
@@ -254,6 +261,7 @@ function draconis.attach_passenger(self, player)
 				position = {x = 0, y = 1}
 			})
 		}
+		draconis.mounted_player_data[player_name] = data
 	end
 end
 
@@ -264,7 +272,7 @@ function draconis.detach_player(self, player)
 		return
 	end
 	local player_name = player:get_player_name()
-	local data = draconis.mounted_player_data[player_name]
+	local data = draconis.mounted_player_data[player_name] or {}
 	-- Attach Player
 	player:set_detach()
 	-- Set HUD
@@ -362,11 +370,11 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	if formname == "draconis:dragon_mount_settings" then
 		if fields.btn_view_point then
 			draconis.aux_key_setting[name] = "pov"
-			minetest.chat_send_player(name, "Sprint key now changes point of view")
+			minetest.chat_send_player(name, S("Sprint key now changes point of view"))
 		end
 		if fields.btn_pitch_toggle then
 			draconis.aux_key_setting[name] = "vert_method"
-			minetest.chat_send_player(name, "Sprint key now changes vertical movement method")
+			minetest.chat_send_player(name, S("Sprint key now changes vertical movement method"))
 		end
 	end
 end)
@@ -380,9 +388,9 @@ end)
 
 minetest.register_on_dieplayer(function(player)
 	local name = player:get_player_name()
-	if name
-	and draconis.mounted_player_data[name] then
-		draconis.detach_player(draconis.mounted_player_data[name].dragon, player)
+	local data = draconis.mounted_player_data[name]
+	if data and data.dragon then
+		draconis.detach_player(data.dragon, player)
 	end
 end)
 
@@ -405,10 +413,12 @@ local function update_hud(self, player)
 	local breath = self.attack_stamina / 100 * 100
 	local hud_data = draconis.mounted_player_data[name].huds
 	-- Update Elements
-	player:hud_remove(hud_data["health"])
-	player:hud_remove(hud_data["hunger"])
-	player:hud_remove(hud_data["stamina"])
-	player:hud_remove(hud_data["breath"])
+	if hud_data then
+		player:hud_remove(hud_data["health"])
+		player:hud_remove(hud_data["hunger"])
+		player:hud_remove(hud_data["stamina"])
+		player:hud_remove(hud_data["breath"])
+	end
 	draconis.mounted_player_data[name].huds = {
 		["health"] = set_hud(player, {
 			text = "draconis_forms_health_bg.png^[lowpart:" .. health .. ":draconis_forms_health_fg.png",
@@ -469,7 +479,7 @@ creatura.register_utility("draconis:mount", function(self)
 		if not _self:get_action() then
 			if control.aux1 then
 				if draconis.aux_key_setting[player_name] == "pov" then
-					if not view_held then
+					if not view_held and player_data.fake_player then
 						if view_point == 3 then
 							view_point = 1
 							player_data.fake_player:set_properties({
@@ -652,7 +662,7 @@ creatura.register_utility("draconis:wyvern_mount", function(self)
 		end
 
 		if control.aux1 then
-			if not view_held then
+			if not view_held and player_data.fake_player then
 				if view_point == 2 then
 					view_point = 1
 					player_data.fake_player:set_properties({

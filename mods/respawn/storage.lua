@@ -1,8 +1,8 @@
 
 -- Maybe those storage helpers should have their own mod?
 
-local storage_base_path = minetest.get_worldpath() .. "/"
-local storage_ext = "." .. minetest.get_current_modname() .. ".db"
+local storage_base_path = core.get_worldpath() .. "/"
+local storage_ext = "." .. core.get_current_modname() .. ".db"
 storage_files = {}
 
 respawn.load_db = function( key )
@@ -26,7 +26,7 @@ respawn.load_db = function( key )
 	local value
 	
 	if str and str ~= "" then
-		value = minetest.parse_json( str )
+		value = core.parse_json( str )
 		if value then
 			return value
 		end
@@ -57,6 +57,6 @@ respawn.save_db = function( key , value )
 	-- So to improve perf and not opening/closing/overwriting files everytime something needs to be written we use this trick:
 	-- we add a new line after writing JSON.
 	-- When loading, we only load the first line.
-	file:write( minetest.write_json( value ) , "\n" )
+	file:write( core.write_json( value ) , "\n" )
 end
 

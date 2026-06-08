@@ -1,10 +1,10 @@
 etherium_stuff = {}
 
-local modpath=minetest.get_modpath("etherium_stuff")
+local modpath=core.get_modpath("etherium_stuff")
 
 -- Intllib
 local S
-if minetest.global_exists("intllib") then
+if core.global_exists("intllib") then
 	if intllib.make_gettext_pair then
 		-- New method using gettext.
 		S = intllib.make_gettext_pair()
@@ -17,9 +17,9 @@ else
 end
 etherium_stuff.intllib = S
 
-dofile(minetest.get_modpath("etherium_stuff").."/torch.lua")
-dofile(minetest.get_modpath("etherium_stuff").."/crafting.lua")
-dofile(minetest.get_modpath("etherium_stuff").."/water.lua")
-dofile(minetest.get_modpath("etherium_stuff").."/nodes.lua")
-dofile(minetest.get_modpath("etherium_stuff").."/stairs.lua")
-dofile(minetest.get_modpath("etherium_stuff").."/lucky_block.lua")
+dofile(core.get_modpath("etherium_stuff").."/torch.lua")
+dofile(core.get_modpath("etherium_stuff").."/crafting.lua")
+dofile(core.get_modpath("etherium_stuff").."/water.lua")
+dofile(core.get_modpath("etherium_stuff").."/nodes.lua")
+dofile(core.get_modpath("etherium_stuff").."/stairs.lua")
+dofile(core.get_modpath("etherium_stuff").."/lucky_block.lua")

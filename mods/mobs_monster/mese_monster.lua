@@ -1,7 +1,7 @@
 
 -- translation and custom mese monster types
 
-local S = minetest.get_translator("mobs_monster")
+local S = core.get_translator("mobs_monster")
 
 local mese_monster_types = {
 
@@ -135,6 +135,7 @@ local mese_monster_types = {
 -- Mese Monster by SirrobZeroone
 
 mobs:register_mob("mobs_monster:mese_monster", {
+	description = S("Mese Monster"),
 	type = "monster",
 	visual_size = {x = 10, y = 10},  -- Got scale wrong in blender by factor of 10 - S01
 	passive = false,
@@ -151,7 +152,7 @@ mobs:register_mob("mobs_monster:mese_monster", {
 	hp_min = 10,
 	hp_max = 25,
 	armor = 80,
-	collisionbox = {-0.75, -0.5, -0.75, 0.75, 2.5, 0.75},
+	collisionbox = {-0.6, -0.5, -0.6, 0.6, 1.8, 0.6},
 	visual = "mesh",
 	mesh = "mobs_mese_monster.b3d",
 	textures = {{"mobs_mese_monster_purple.png"}},
@@ -164,7 +165,6 @@ mobs:register_mob("mobs_monster:mese_monster", {
 	view_range = 10,
 	walk_velocity = 1,
 	run_velocity = 3,
-	jump = true,
 	jump_height = 8,
 	can_leap = true,
 	fall_damage = 0,
@@ -238,11 +238,11 @@ mobs:register_mob("mobs_monster:mese_monster", {
 		-- direction sets type N = red, E = green, S = blue, W = purple
 		-- Just for fun - S01
 
-		local objects = minetest.get_objects_inside_radius(pos, 10)
+		local objects = core.get_objects_inside_radius(pos, 10)
 
 		for i, obj in ipairs(objects) do
 
-			if minetest.is_player(obj)
+			if core.is_player(obj)
 			and obj:get_wielded_item():get_name() == "mobs_monster:mese_monster" then
 
 				local degree = (360 + math.deg(obj:get_look_horizontal())) % 360
@@ -271,7 +271,7 @@ mobs:register_mob("mobs_monster:mese_monster", {
 
 -- mese arrow item
 
-minetest.register_craftitem("mobs_monster:mese_crystal_fragment_arrow", {
+core.register_craftitem("mobs_monster:mese_crystal_fragment_arrow", {
 	description = S("Mese Monster Arrow"),
 	inventory_image = "mobs_mese_arrow.png",
 	groups = {not_in_creative_inventory = 1}
@@ -289,18 +289,14 @@ mobs:register_arrow("mobs_monster:mese_arrow", {
 
 	hit_player = function(self, player)
 
-		player:punch(self.object, 1.0, {
-			full_punch_interval = 1.0,
-			damage_groups = {fleshy = self.damage}
-		}, nil)
+		player:punch(self.object, 1.0,
+				{full_punch_interval = 1.0, damage_groups = {fleshy = self.damage}}, nil)
 	end,
 
 	hit_mob = function(self, player)
 
-		player:punch(self.object, 1.0, {
-			full_punch_interval = 1.0,
-			damage_groups = {fleshy = self.damage}
-		}, nil)
+		player:punch(self.object, 1.0,
+				{full_punch_interval = 1.0, damage_groups = {fleshy = self.damage}}, nil)
 	end,
 
 	hit_node = function(self, pos, node)
@@ -333,7 +329,7 @@ mobs:alias_mob("mobs:mese_monster", "mobs_monster:mese_monster")
 
 local f = "default:mese_crystal_fragment"
 
-minetest.register_craft({
+core.register_craft({
 	output = "default:mese_crystal",
 	recipe = {{f, f, f}, {f, f, f}, {f, f, f}}
 })

@@ -1,5 +1,5 @@
-local S = minetest.get_translator("unified_inventory")
-local F = minetest.formspec_escape
+local S = core.get_translator("unified_inventory")
+local F = core.formspec_escape
 local ui = unified_inventory
 local COUNT = 5
 
@@ -57,7 +57,7 @@ local function set_waypoint_data(player, waypoints)
 		-- Empty data. Do not save anything, or delete
 		meta:set_string("ui_waypoints", "")
 	else
-		meta:set_string("ui_waypoints", minetest.write_json(waypoints))
+		meta:set_string("ui_waypoints", core.write_json(waypoints))
 	end
 end
 
@@ -80,7 +80,7 @@ local function migrate_datastorage(player, waypoints)
 	waypoints[1] = 1
 end
 
-local have_datastorage = minetest.get_modpath("datastorage") ~= nil
+local have_datastorage = core.get_modpath("datastorage") ~= nil
 local function get_waypoint_data(player)
 	local player_name = player:get_player_name()
 
@@ -89,14 +89,14 @@ local function get_waypoint_data(player)
 		local waypoints = datastorage.get(player_name, "waypoints")
 		if waypoints.selected then
 			migrate_datastorage(player, waypoints)
-			minetest.log("action", "[unified_inventory] " ..
+			core.log("action", "[unified_inventory] " ..
 				"Migrated waypoints of player: " .. player_name)
 		end
 	end
 
 	-- Get directly from metadata
 	local waypoints = player:get_meta():get("ui_waypoints")
-	waypoints = waypoints and minetest.parse_json(waypoints) or {}
+	waypoints = waypoints and core.parse_json(waypoints) or {}
 	waypoints.data = waypoints.data or {}
 
 	return waypoints
@@ -164,7 +164,8 @@ ui.register_page("waypoints", {
 			},
 			{
 				"toggle_display_pos",
-				waypoint.display_pos and "ui_green_icon_background.png^ui_xyz_icon.png" or "ui_red_icon_background.png^ui_xyz_icon.png^(ui_no.png^[transformR90)",
+				waypoint.display_pos and "ui_green_icon_background.png^ui_xyz_icon.png" or
+					"ui_red_icon_background.png^ui_xyz_icon.png^(ui_no.png^[transformR90)",
 				waypoint.display_pos and S("Hide coordinates") or S("Show coordinates")
 			},
 			{
@@ -173,7 +174,7 @@ ui.register_page("waypoints", {
 				S("Change color of waypoint display")
 			},
 		}
-		if minetest.get_player_privs(player_name).teleport then
+		if core.get_player_privs(player_name).teleport then
 			table.insert(btnlist, {
 				"teleport_waypoint",
 				"ui_teleport.png",
@@ -210,7 +211,7 @@ ui.register_page("waypoints", {
 
 		formspec[n] = string.format("label[%f,%f;%s: %s]",
 			wp_info_x, wp_info_y+1.6, F(S("World position")),
-			minetest.pos_to_string(waypoint.world_pos or vector.new()))
+			core.pos_to_string(waypoint.world_pos or vector.new()))
 		formspec[n+1] = string.format("label[%f,%f;%s: %s]",
 			wp_info_x, wp_info_y+2.10, F(S("Name")), (waypoint.name or default_name))
 		formspec[n+2] = string.format("label[%f,%f;%s: %s]",
@@ -239,7 +240,7 @@ local function update_hud(player, waypoints, temp, i)
 	local pos = waypoint.world_pos or vector.new()
 	local name
 	if waypoint.display_pos then
-		name = minetest.pos_to_string(pos)
+		name = core.pos_to_string(pos)
 		if waypoint.name then
 			name = name..", "..waypoint.name
 		end
@@ -254,7 +255,7 @@ local function update_hud(player, waypoints, temp, i)
 	end
 	if waypoint.active then
 		temp.hud = player:hud_add({
-			hud_elem_type = "waypoint",
+			[core.features.hud_def_type_field and "type" or "hud_elem_type"] = "waypoint",
 			number = hud_colors[waypoint.color or 1][2] ,
 			name = name,
 			text = "m",
@@ -263,7 +264,7 @@ local function update_hud(player, waypoints, temp, i)
 	end
 end
 
-minetest.register_on_player_receive_fields(function(player, formname, fields)
+core.register_on_player_receive_fields(function(player, formname, fields)
 	if formname ~= "" then return end
 
 	local player_name = player:get_player_name()
@@ -333,8 +334,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		end
 
 		if fields["teleport_waypoint" .. i] and waypoint.world_pos then
-			if minetest.get_player_privs(player_name).teleport then
-				minetest.sound_play("teleport", {to_player = player_name})
+			if core.get_player_privs(player_name).teleport then
+				core.sound_play("teleport", {to_player = player_name})
 				player:set_pos(waypoint.world_pos)
 			end
 		end
@@ -349,7 +350,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			update_hud(player, waypoints, temp, i)
 		end
 		if update_formspec then
-			minetest.sound_play("ui_click", {to_player=player_name, gain = 0.1})
+			core.sound_play("ui_click", {to_player=player_name, gain = 0.1})
 			ui.set_inventory_formspec(player, "waypoints")
 		end
 
@@ -359,7 +360,7 @@ end)
 
 -- waypoints_temp must be initialized before the general unified_inventory
 -- joinplayer callback is run for updating the inventory
-table.insert(minetest.registered_on_joinplayers, 1, function(player)
+table.insert(core.registered_on_joinplayers, 1, function(player)
 	local player_name = player:get_player_name()
 	local waypoints = get_waypoint_data(player)
 
@@ -369,7 +370,7 @@ table.insert(minetest.registered_on_joinplayers, 1, function(player)
 	end
 end)
 
-minetest.register_on_leaveplayer(function(player)
+core.register_on_leaveplayer(function(player)
 	waypoints_temp[player:get_player_name()] = nil
 end)
 

@@ -1,4 +1,4 @@
-minetest.register_node("etherium_stuff:crystal_water_source", {
+core.register_node("etherium_stuff:crystal_water_source", {
 	description = "Crystal Water Source",
 	drawtype = "liquid",
 	tiles = {
@@ -42,7 +42,7 @@ minetest.register_node("etherium_stuff:crystal_water_source", {
 	sounds = default.node_sound_water_defaults(),
 })
 
-minetest.register_node("etherium_stuff:crystal_water_flowing", {
+core.register_node("etherium_stuff:crystal_water_flowing", {
 	description = "Flowing Crystal Water",
 	drawtype = "flowingliquid",
 	tiles = {"etherium_crystal_water.png"},

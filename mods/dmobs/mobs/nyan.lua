@@ -47,16 +47,14 @@ mobs:register_mob("dmobs:nyan", {
 
 		self.rb_count = (self.rb_count or 0) + dtime
 
-		if self.rb_count < .2 then
-			return
-		end
+		if self.rb_count < .2 then return end
 
 		self.rb_count = 0
 
 		local apos = self.object:get_pos() ; if not apos then return end
 		local vec = self.object:get_velocity()
 
-		minetest.add_particlespawner({
+		core.add_particlespawner({
 			amount = 5,
 			time = 0.3,
 			minpos = {x = apos.x - 0.1, y = apos.y + 0.3, z = apos.z - 0.1},
@@ -77,11 +75,9 @@ mobs:register_mob("dmobs:nyan", {
 
 	on_rightclick = function(self, clicker)
 
-		if mobs:feed_tame(self, clicker, 8, true, true) then
-			return
-		end
-
-		mobs:capture_mob(self, clicker, 0, 5, 50, false, nil)
+		if mobs:protect(self, clicker) then return end
+		if mobs:feed_tame(self, clicker, 8, true, true) then return end
+		if mobs:capture_mob(self, clicker, 0, 5, 50, false, nil) then return end
 	end
 })
 

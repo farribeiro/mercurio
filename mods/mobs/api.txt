@@ -50,8 +50,10 @@ functions needed for the mob to work properly which contains the following:
                    set to 0 for jumping mobs only.
    'randomly_turn' if set to false then mob will not turn to face player or
                    randomly turn while walking or standing.
-   'jump'          when true allows your mob to jump updwards.
-   'jump_height'   holds the height your mob can jump, 0 to disable jumping.
+   'jump'          when true allows your mob to jump updwards[DEPRECATED].
+   'jump_height'   velocity your mob can jump, 0 to disable jumping.
+   'jump_chance'   has a 0-100 chance value your jumping only mob will jump
+                   from standing.
    'can_leap'      when true obstacles like fences or pits wont stop a mob
                    from trying to jump out.
    'stepheight'    height of a block that your mob can easily walk up onto,
@@ -73,8 +75,8 @@ functions needed for the mob to work properly which contains the following:
                    or default when enabled is "^[colorize:#c9900070".
    'knock_back'    when true has mobs falling backwards when hit, the greater
                    the damage the more they move back.
-   'fear_height'   is how high a cliff or edge has to be before the mob stops
-                   walking, 0 to turn off height fear.
+   'fear_height'   is how many nodes high a cliff or edge has to be before the mob
+                   stops walking, 0 to turn off height fear.
    'fall_speed'    has the maximum speed the mob can fall at, default is -10.
    'fall_damage'   when true causes falling to inflict damage.
    'water_damage'  holds the damage per second infliced to mobs when standing in
@@ -92,7 +94,7 @@ functions needed for the mob to work properly which contains the following:
                       When set to 16 then only natural light will kill mob.
    'suffocation'   when > 0 mobs will suffocate inside solid blocks and will be
                    hurt by the value given every second (0 to disable).
-   'floats'        when set to 1 mob will float in water, 0 has them sink.
+   'floats'        when True mob will float in water, otherwise they sink.
    'follow'        mobs follow player when holding any of the items which appear
                    on this table, the same items can be fed to a mob to tame or
                    breed e.g. {"farming:wheat", "default:apple", "group:fish"}
@@ -102,7 +104,8 @@ functions needed for the mob to work properly which contains the following:
    'docile_by_day'       when true has mobs wandering around during daylight
                          hours and only attacking player at night or when
                          provoked.
-   'attack_chance'       0 to 100 chance the mob will attack (default is 5).
+   'attack_chance'       0 to 100 chance the mob will attack (default is 5),
+                         set to 100 so that mob needs to be provoked to attack.
    'attack_patience'     Time in seconds before mob gives up attacking if
                          player isn't seen (Defaults to 11).
    'attack_monsters'     when true mob will attack monsters.
@@ -141,7 +144,7 @@ functions needed for the mob to work properly which contains the following:
    'arrow'               holds the pre-defined arrow object to shoot when
                          attacking.
    'arrow_override'      function that allows tweaking of arrow entity from
-                         inside mob definition (self) passed to function.
+                         inside mob definition (self, mob_ent) passed to function.
    'dogshoot_switch'     allows switching between attack types by using timers
                          (1 for shoot, 2 for dogfight)
    'dogshoot_count_max'  contains how many seconds before switching from
@@ -152,6 +155,7 @@ functions needed for the mob to work properly which contains the following:
    'shoot_offset'         holds the y position added as to where the
                          arrow/fireball appears on mob.
    'homing'              When True arrows will follow player when visible.
+   'punch_interval'      the number of seconds between punches (default: 1)
    'specific_attack'     has a table of entity names that mob can also attack
                          e.g. {"player", "mobs_animal:chicken"}.
    'friendly_fire`       when set to false, mobs will not be able to harm other
@@ -186,12 +190,16 @@ functions needed for the mob to work properly which contains the following:
       'random'            random sound that plays during gameplay.
       'war_cry'           what you hear when mob starts to attack player.
       'attack'            what you hear when being attacked.
+      'attack_chance'     random chance value of playing attack sound (defaults to 1)
       'shoot_attack'      sound played when mob shoots.
       'damage'            sound heard when mob is hurt.
       'death'             played when mob is killed.
       'jump'              played when mob jumps.
       'fuse'              sound played when mob explode timer starts.
       'explode'           sound played when mob explodes.
+
+      Each sound can be either a string or sound table e.g. "mobs_chicken" or
+      {name = "mobs_chicken", pitch = 1.2, gain = 1.3, max_hear_distance = 8}
 
    'drops'     table of items that are dropped when mob is killed, fields are:
       'name'   name of item to drop.
@@ -230,8 +238,6 @@ functions needed for the mob to work properly which contains the following:
    'rotate'            custom model rotation, 0 = front, 90 = side, 180 = back,
                        270 = other side.
    'glow'              has mob glow without light source, 0 to 15 or nil to disable
-   'double_melee_attack' when true has the api choose between 'punch' and
-                      'punch2' animations. [DEPRECATED]
 
    'animation'       holds a table containing animation names and settings for use with
                      mesh models:
@@ -310,6 +316,25 @@ eating.
        properties. (DEPRECATED, use on_replace to make changes).
 
 
+Pickup Items
+------------
+
+   'pick_up'            table of itemstrings the mob will pick up.
+   'on_pick_up'         function that will be called on item pickup - arguments are
+                        (self, itemtable) and can return nil or a a modified itemstack e.g.
+
+on_pick_up = function(self, itemtable)
+
+		local istack = ItemStack(itemtable.itemstring)
+
+		print("-- took", istack:get_name())
+
+		istack:take_item()
+
+		return istack
+end,
+
+
 Custom Definition Functions
 ---------------------------
 
@@ -331,22 +356,27 @@ enhance mob functionality and have them do many interesting things:
    'on_grown'       is called when a child mob has grown up, only paramater is
                     (self).
    'do_punch'       called when mob is punched with paramaters (self, hitter,
-                    time_from_last_punch, tool_capabilities, direction), return
-                    false to stop punch damage and knockback from taking place.
+                    time_from_last_punch, tool_capabilities, direction, damage),
+                    return false to stop punch damage and knockback from taking
+                    place.
    'custom_attack'  when set this function is called instead of the normal mob
                     melee attack, parameters are (self, to_attack) and if true
                     is returned normal attack function continued.
    'on_die'         a function that is called when mob is killed (self, pos), also
-                    has access to self.cause_of_death table.
+                    has access to self.cause_of_death table, if True is returned
+                    then mob will not be removed (for special features).
    'on_death'       Official engine version of above when mob killed (self, killer),
                     'killer' is only returned if player killed the mob.
    'on_flop'        function called when flying or swimmimng mob is no longer in
                     air/water, (self) paramater and return true to skip the built
                     in api flop feature.
    'do_custom'      a custom function that is called every tick while mob is
-                    active and which has access to all of the self.* variables
-                    e.g. (self.health for health or self.standing_in for node
-                    status), return with 'false' to skip remainder of mob API.
+                    active (self, dtime, moveresult) and which has access to all
+                    of the self.* variables e.g. (self.health for health or
+                    self.standing_in for node status), return with 'false' to skip
+                    remainder of mob functions.
+   'do_mount_action' a custom function used only when riding a mob and holding the
+                     sneak key while pressing LMB (self, dtime)
    'on_sound'       (self, def) called when mob is inside the hearing distance of
                     a sound, passes a def table containing:
       'sound'       the sound being played,
@@ -429,6 +459,8 @@ mob_class:collision() -- checks for player collision with mob and returns {x, z}
 mob_class:set_velocity(velocity) -- move at velocity in the facing direction
 mob_class:get_velocity() -- returns mob speed value
 mob_class:set_yaw(yaw, delay) -- change mob yaw, delay is for smooth rotation (default:0)
+mob:class_set_pitch(pitch) -- change mob pitch in radians
+mob:class_set_roll(roll) -- change mob roll in radians
 mob_class:yaw_to_pos(pos, delay) -- rotates mod to look at position and returns new yaw
 mob_class:set_animation(animation, force) -- set mob animation
 mob_class:line_of_sight(pos1, pos2) -- internal line of sight function
@@ -443,6 +475,7 @@ mob_class:on_blast(damage) -- function called when mob in blast area
 mob_class:is_inside(itemtable) -- returns True is mob collisionbox inside any node/group
 in table
 mob_class:go_to(pos) -- makes mob go to that position or nearby
+mob_class:death_anim() -- plays mob death animation if found before removing mob
 
 
 Adding Mobs in World
@@ -566,12 +599,14 @@ This function registers a arrow for mobs with the attack type shoot.
     'definition'      is a table with the following values:
        'visual'       same is in minetest.register_entity()
        'visual_size'  same is in minetest.register_entity()
+       'mesh'         same is in minetest.register_entity()
        'textures'     same is in minetest.register_entity()
        'collide_with_objects'       same as above
        'velocity'     the velocity of the arrow
        'drop'         if set to true any arrows hitting a node will drop as item,
                       if number given then chance (1/num) of item dropping will
                       be used.  arrow "mymob:myarrow" will use item of same name.
+       'drop_item'    name of custom item to drop instead of arrow.
        'hit_player'   a function that is called when the arrow hits a player;
                       this function should hurt the player, the parameters are
                       (self, player)
@@ -581,7 +616,8 @@ This function registers a arrow for mobs with the attack type shoot.
        'hit_object'   a function that is called when the arrow hits an object;
                       this function parameters are (self, player)
        'hit_node'     a function that is called when the arrow hits a node, the
-                      parameters are (self, pos, node)
+                      parameters are (self, pos, node), pos is the arrow position
+                      and self.node_pos is the node position it hit.
        'tail'         when set to 1 adds a trail or tail to mob arrows
        'tail_texture' texture string used for above effect
        'tail_size'    has size for above texture (defaults to between 5 and 10)
@@ -596,12 +632,18 @@ This function registers a arrow for mobs with the attack type shoot.
        'collisionbox' is hitbox table for arrow, {-.1,-.1,-.1,.1,.1,.1} by default.
        'lifetime'     contains float value for how many seconds arrow exists in
                       world before being removed (default is 4.5 seconds).
+       'do_custom'    a custom function that is called every tick while arrow is
+                      active (self, dtime, moveresult), return with 'false' to
+                      skip remainder of arrow functions.
+
+Note: When an arrow hits a solid item moveresult is copied into the arrow
+      self.moveresult for use inside the hit functions.
 
 
 Spawn Eggs
 ----------
 
-mobs:register_egg(name, description, background, addegg, no_creative)
+mobs:register_egg(name, description, background, addegg, no_creative, can_spawn_protect)
 
 This function registers a spawn egg which can be used to properly spawn in a mob.
 Animals are spawned as tamed unless sneak/shift is held while spawning.
@@ -613,6 +655,7 @@ Animals are spawned as tamed unless sneak/shift is held while spawning.
                  0 = no)
    'no_creative' when set to true this stops spawn egg appearing in creative
                  mode for destructive mobs like Dungeon Masters.
+   'can_spawn_protect' when true can spawn mob inside protected areas (default:nil).
 
 
 Explosion Function
@@ -735,8 +778,8 @@ controls.
    'self'            mob information
    'dtime'           tick time used inside fly function
    'speed'           speed of flight
-   'can_shoot'       true if mob can fire arrow (sneak and left mouse button
-                     fires)
+   'can_shoot'       true if mob can fire an arrow (sneak and left mouse button
+                     fires) which is limited to 1 per second.
    'arrow_entity'    name of arrow entity used for firing
    'move_animation'  string containing name of pre-defined animation e.g. "walk"
                      or "fly" etc.
@@ -758,16 +801,14 @@ found.
 
 Certain variables need to be set before using the above functions:
 
-   'self.v2'                toggle switch used to define below values for the
-                            first time
    'self.max_speed_forward' max speed mob can move forward
    'self.max_speed_reverse' max speed mob can move backwards
    'self.accel'             acceleration speed
-   'self.terrain_type'      integer containing terrain mob can walk on
-                            (1 = water, 2 or 3 = land)
    'self.driver_attach_at'  position offset for attaching player to mob
    'self.driver_eye_offset' position offset for attached player view
    'self.driver_scale'      sets driver scale for mobs larger than {x=1, y=1}
+   'self.alt_turn'          defaults to looking in mouse direction but when
+                            True requires left and right keys to look around
 
 
 mobs:line_of_sight(self, pos1, pos2, stepsize) [DEPRECATED]
@@ -854,7 +895,8 @@ External Settings for "minetest.conf"
    'mob_pathfinding_enable'     Enable pathfinding.
    'mob_pathfinding_stuck_timeout'      How long before stuck mobs start searching. (default 3.0)
    'mob_pathfinding_stuck_path_timeout'     How long will mob follow path before giving up. (default 5.0)
-   'mob_pathfinding_algorithm'  Which pathfinding algorithm to use Dijkstra (default), A*_noprefetch (AStar_noprefetch) or A* (AStar)
+   'mob_pathfinding_algorithm'  Which pathfinding algorithm to use Dijkstra, A*_noprefetch
+                                (AStar_noprefetch) [default] or A* (AStar)
                             (A* names differ cause Minetest doesn´t allow "*" in settings)
    'mob_pathfinding_searchdistance'     max search distance from search positions (default 16)
    'mob_pathfinding_max_jump'   max jump height for pathfinding (default 4)
@@ -865,6 +907,7 @@ External Settings for "minetest.conf"
                             custom on_sound function.
    'mobs_disable_damage_kb' Knockback is calculated by hit damage or uses knockback value
                             from the weapon used, this setting lets you disable the former.
+   'mob_infotext'          True by default, shows mob information when you hover over one.
 
 Players can override the spawn chance for each mob registered by adding a line
 to their minetest.conf file with a new value, the lower the value the more each
@@ -919,3 +962,4 @@ mobs:yaw_to_pos(self, target, rotation_steps)
 mobs:line_of_sight(self, pos1, pos2)
 mobs:set_animation(self, animation)
 mobs:yaw(self, yaw, rotation_steps)
+mobs:scale_mob(self, width, height, permanent) -- scale by w,h

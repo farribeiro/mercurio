@@ -1,4 +1,4 @@
-Minetest 5.4 mod: Steampunk Blimp
+Minetest 5.9 mod: Steampunk Blimp
 ========================================
 
 This mod implements a fantasy steampunk blimp for minetest.
@@ -77,6 +77,7 @@ MIT (see file LICENSE)
 License of media (textures and sounds):
 ---------------------------------------
 collision.ogg by APercy, CC0
+steampunk_blimp_steam_whistle.ogg by Orwell (got from adv_trains), CC-BY-SA-3.0
 
 Blimp model and textures by APercy. CC BY-SA 3.0
 

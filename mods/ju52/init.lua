@@ -1,6 +1,7 @@
 ju52={}
 
 dofile(minetest.get_modpath("ju52") .. DIR_DELIM .. "forms.lua")
+dofile(minetest.get_modpath("ju52") .. DIR_DELIM .. "walk_map.lua")
 
 ju52.skin_texture = "ju52_painting.png"
 function ju52.set_skin(object, skin_image_name, search_string)
@@ -22,6 +23,8 @@ end
 
 function ju52.register_parts_method(self)
     --self._skin = self._vehicle_custom_data._skin
+    --initialize positions
+    ju52.initialize(self)
 
     local pos = self.object:get_pos()
 
@@ -36,13 +39,14 @@ function ju52.register_parts_method(self)
     cabin:set_attach(self.object,'',{x=0,y=0,z=40},{x=0,y=0,z=0})
     self.cabin = cabin
 
-    self.object:set_bone_position("aileron_base_r", {x=93.7994, y=3.35, z=-15.3002}, {x=180, y=-7.45, z=5.3})
-    self.object:set_bone_position("aileron_base_l", {x=-93.7994, y=3.35, z=-15.3002}, {x=180, y=7.54, z=-5.3})
+    --self.object:set_bone_position("aileron_base_r", {x=93.7994, y=3.35, z=-15.3002}, {x=180, y=-7.45, z=5.3})
+    --self.object:set_bone_position("aileron_base_l", {x=-93.7994, y=3.35, z=-15.3002}, {x=180, y=7.54, z=-5.3})
 
     self.object:set_bone_position("flap_base_l", {x=-49.2648, y=-1.41543, z=-12.0}, {x=0, y=185.4, z=0})
     self.object:set_bone_position("flap_base_r", {x=49.2648, y=-1.41543, z=-12.0}, {x=0, y=-185.4, z=0})
 
     --ju52.set_skin(self.object, self._skin, ju52.skin_texture)
+
 end
 
 function ju52.destroy_parts_method(self)
@@ -52,9 +56,16 @@ end
 
 function ju52.step_additional_function(self)
 
+    ju52.move_persons(self)
+
     if (self.driver_name==nil) and (self.co_pilot==nil) then --pilot or copilot
         return
     end
+
+    --power
+    local power_angle = ((self._power_lever*1.5)/4.5)
+    self.object:set_bone_position("power_lever", {x=1, y=-37.4, z=14}, {x=0, y=-(power_angle - 20), z=90}) --(power_indicator_angle-45)
+    --core.chat_send_all("power angle: "..power_angle)
 
     local pos = self._curr_pos
 
@@ -85,10 +96,6 @@ function ju52.step_additional_function(self)
 
     self.object:set_bone_position("altimeter_p1_2", {x=9.5, y=-40.6, z=16.6}, {x=0, y=-(hour_angle), z=0})
     self.object:set_bone_position("altimeter_p2_2", {x=9.5, y=-41.1, z=16.6}, {x=0, y=-(minute_angle), z=0})
-
-    --power
-    local power_angle = ((self._power_lever*1.5)/4.5)
-    self.object:set_bone_position("power", {x=1, y=-37.4, z=14}, {x=0, y=-(power_angle - 20), z=90}) --(power_indicator_angle-45)
 end
 
 function ju52._custom_punch_when_attached(self, player)
@@ -109,7 +116,7 @@ ju52.plane_properties = {
 	    physical = true,
         collide_with_objects = true,
 	    collisionbox = {-4, -2.31, -4, 4, 1, 4},
-	    selectionbox = {-2, -2.31, -2, 2, 1, 2},
+	    selectionbox = {-2, -2.31, -2, 2, 0, 2},
 	    visual = "mesh",
         backface_culling = false,
 	    mesh = "ju52_body.b3d",
@@ -262,7 +269,7 @@ ju52.plane_properties = {
     logic = airutils.logic,
     on_step = airutils.on_step,
     on_punch = airutils.on_punch,
-    on_rightclick = airutils.on_rightclick,
+    on_rightclick = ju52.right_click_function, --airutils.on_rightclick,
 }
 
 dofile(minetest.get_modpath("ju52") .. DIR_DELIM .. "crafts.lua")

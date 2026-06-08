@@ -15,6 +15,7 @@ ignore = {
 max_line_length = 200
 
 read_globals = {
+	"core",
 	"default",
 	"digiline",
 	"doors",
@@ -29,6 +30,7 @@ read_globals = {
 	"VoxelArea",
 	"mcl_dyes",
 	"mcl_sounds",
+	"hades_sounds",
 }
 
 globals = {"mesecon"}

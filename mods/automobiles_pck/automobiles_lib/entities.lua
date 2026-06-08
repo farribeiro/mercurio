@@ -11,6 +11,7 @@ initial_properties = {
     on_activate = function(self,std)
 	    self.sdata = minetest.deserialize(std) or {}
 	    if self.sdata.remove then self.object:remove() end
+        self.object:set_armor_groups({immortal=1})
     end,
 
     get_staticdata=function(self)
@@ -34,6 +35,7 @@ initial_properties = {
     on_activate = function(self,std)
 	    self.sdata = minetest.deserialize(std) or {}
 	    if self.sdata.remove then self.object:remove() end
+        self.object:set_armor_groups({immortal=1})
     end,
 	    
     get_staticdata=function(self)
@@ -78,7 +80,9 @@ function automobiles_lib.on_rightclick (self, clicker)
         else
             --minetest.chat_send_all("clicou")
             --a passenger
-            if not player_api.player_attached[name] then
+
+            if (automobiles_lib.is_minetest and not player_api.player_attached[name]) or
+                (automobiles_lib.is_mcl and not mcl_player.player_attached[name]) then
                 --there is no passenger, so lets attach
                 if self.driver_name then
                     local attach_pax_f = automobiles_lib.attach_pax
@@ -113,7 +117,8 @@ function automobiles_lib.on_punch (self, puncher, ttime, toolcaps, dir, damage)
 	end
     
     local is_attached = false
-    if puncher:get_attach() == self.driver_seat then is_attached = true end
+    local obj_attach = puncher:get_attach()
+    if obj_attach == self.driver_seat or obj_attach == self.object then is_attached = true end
 
     local itmstck=puncher:get_wielded_item()
     local item_name = ""
@@ -189,11 +194,40 @@ function automobiles_lib.get_staticdata(self)
         stored_inv_id = self._inv_id,
         stored_car_type = self._car_type,
         stored_car_gravity = self._car_gravity,
+        stored_scale = self._vehicle_scale or 1,
+        stored_power_scale = self._vehicle_power_scale or 1,
         --race data
         stored_last_checkpoint = self._last_checkpoint,
         stored_total_laps = self._total_laps,
         stored_race_id = self._race_id,
     })
+end
+
+local function scale_entity(self, scale)
+    scale = scale or 1
+    local initial_properties = automobiles_lib.properties_copy(self.initial_properties)
+	local new_properties = automobiles_lib.properties_copy(initial_properties)
+
+	--[[if initial_properties.collisionbox then
+		for i, value in ipairs(initial_properties.collisionbox) do
+			new_properties.collisionbox[i] = value * scale
+            --core.log("action", new_properties.collisionbox[i])
+		end
+	end
+
+	if initial_properties.selectionbox then
+		for i, value in ipairs(initial_properties.selectionbox) do
+			new_properties.selectionbox[i] = value * scale
+		end
+	end]]--
+
+    if initial_properties.stepheight then
+        new_properties.stepheight = initial_properties.stepheight * scale
+    end
+
+	new_properties.visual_size = {x=scale, y=scale}
+
+	self.object:set_properties(new_properties)
 end
 
 function automobiles_lib.on_activate(self, staticdata, dtime_s)
@@ -217,6 +251,8 @@ function automobiles_lib.on_activate(self, staticdata, dtime_s)
 
         self._car_type = data.stored_car_type
         self._car_gravity = data.stored_car_gravity or -automobiles_lib.gravity
+        self._vehicle_scale = data.stored_scale or 1
+        self._vehicle_power_scale = data.stored_power_scale or 1
 
         automobiles_lib.setText(self, self._vehicle_name)
         if data.remove then
@@ -226,73 +262,94 @@ function automobiles_lib.on_activate(self, staticdata, dtime_s)
         end
     end
 
+    scale_entity(self, self._vehicle_scale)
+
     if self._painting_load then
         self._painting_load(self, self._color)
     else
         automobiles_lib.paint(self, self._color)
     end
+
     local pos = self.object:get_pos()
 
     local front_suspension=minetest.add_entity(self.object:get_pos(),self._front_suspension_ent)
-    front_suspension:set_attach(self.object,'',self._front_suspension_pos,{x=0,y=0,z=0})
-    self.front_suspension = front_suspension
+    if front_suspension then
+        front_suspension:set_attach(self.object,'',self._front_suspension_pos,{x=0,y=0,z=0})
+        self.front_suspension = front_suspension
+    end
 
     if self._front_wheel_ent then
         local lf_wheel=minetest.add_entity(pos,self._front_wheel_ent)
-        lf_wheel:set_attach(self.front_suspension,'',{x=-self._front_wheel_xpos,y=0,z=0},{x=0,y=0,z=0})
-	    -- set the animation once and later only change the speed
-        lf_wheel:set_animation(self._front_wheel_frames, 0, 0, true)
-        self.lf_wheel = lf_wheel
+        if lf_wheel then
+            lf_wheel:set_attach(self.front_suspension,'',{x=-self._front_wheel_xpos,y=0,z=0},{x=0,y=0,z=0})
+	        -- set the animation once and later only change the speed
+            lf_wheel:set_animation(self._front_wheel_frames, 0, 0, true)
+            self.lf_wheel = lf_wheel
+        end
 
         local rf_wheel=minetest.add_entity(pos,self._front_wheel_ent)
-        rf_wheel:set_attach(self.front_suspension,'',{x=self._front_wheel_xpos,y=0,z=0},{x=0,y=180,z=0})
-	    -- set the animation once and later only change the speed
-        rf_wheel:set_animation(self._front_wheel_frames, 0, 0, true)
-        self.rf_wheel = rf_wheel
+        if rf_wheel then
+            rf_wheel:set_attach(self.front_suspension,'',{x=self._front_wheel_xpos,y=0,z=0},{x=0,y=180,z=0})
+	        -- set the animation once and later only change the speed
+            rf_wheel:set_animation(self._front_wheel_frames, 0, 0, true)
+            self.rf_wheel = rf_wheel
+        end
     end
 
     local rear_suspension=minetest.add_entity(self.object:get_pos(),self._rear_suspension_ent)
-    rear_suspension:set_attach(self.object,'',self._rear_suspension_pos,{x=0,y=0,z=0})
-    self.rear_suspension = rear_suspension
+    if rear_suspension then
+        rear_suspension:set_attach(self.object,'',self._rear_suspension_pos,{x=0,y=0,z=0})
+        self.rear_suspension = rear_suspension
+    end
 
     if self._rear_wheel_ent then
         local lr_wheel=minetest.add_entity(pos,self._rear_wheel_ent)
-        lr_wheel:set_attach(self.rear_suspension,'',{x=-self._rear_wheel_xpos,y=0,z=0},{x=0,y=0,z=0})
-	    -- set the animation once and later only change the speed
-        lr_wheel:set_animation(self._rear_wheel_frames, 0, 0, true)
-        self.lr_wheel = lr_wheel
+        if lr_wheel then
+            lr_wheel:set_attach(self.rear_suspension,'',{x=-self._rear_wheel_xpos,y=0,z=0},{x=0,y=0,z=0})
+	        -- set the animation once and later only change the speed
+            lr_wheel:set_animation(self._rear_wheel_frames, 0, 0, true)
+            self.lr_wheel = lr_wheel
+        end
 
         local rr_wheel=minetest.add_entity(pos,self._rear_wheel_ent)
-        rr_wheel:set_attach(self.rear_suspension,'',{x=self._rear_wheel_xpos,y=0,z=0},{x=0,y=180,z=0})
-	    -- set the animation once and later only change the speed
-        rr_wheel:set_animation(self._rear_wheel_frames, 0, 0, true)
-        self.rr_wheel = rr_wheel
+        if rr_wheel then
+            rr_wheel:set_attach(self.rear_suspension,'',{x=self._rear_wheel_xpos,y=0,z=0},{x=0,y=180,z=0})
+	        -- set the animation once and later only change the speed
+            rr_wheel:set_animation(self._rear_wheel_frames, 0, 0, true)
+            self.rr_wheel = rr_wheel
+        end
     end
 
 
     if self._steering_ent then
 	    local steering_axis=minetest.add_entity(pos,'automobiles_lib:pivot_mesh')
-        steering_axis:set_attach(self.object,'',self._drive_wheel_pos,{x=self._drive_wheel_angle,y=0,z=0})
-	    self.steering_axis = steering_axis
+        if steering_axis then
+            steering_axis:set_attach(self.object,'',self._drive_wheel_pos,{x=self._drive_wheel_angle,y=0,z=0})
+            if steering_axis then
+	            self.steering_axis = steering_axis
 
-	    local steering=minetest.add_entity(self.steering_axis:get_pos(), self._steering_ent)
-        steering:set_attach(self.steering_axis,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
-	    self.steering = steering
-    else
-        self.object:set_bone_position("drive_adjust", self._drive_wheel_pos, {x=self._drive_wheel_angle, y=0, z=0}) 
+	            local steering=minetest.add_entity(self.steering_axis:get_pos(), self._steering_ent)
+                steering:set_attach(self.steering_axis,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
+	            self.steering = steering
+            end
+        end
     end
 
     if self._rag_retracted_ent then
         local rag_rect=minetest.add_entity(self.object:get_pos(),self._rag_retracted_ent)
-	    rag_rect:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
-	    self.rag_rect = rag_rect
-        self.rag_rect:set_properties({is_visible=false})
+        if rag_rect then
+	        rag_rect:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
+	        self.rag_rect = rag_rect
+            self.rag_rect:set_properties({is_visible=false})
+        end
     end
 
     if self._rag_extended_ent then
         local rag=minetest.add_entity(self.object:get_pos(),self._rag_extended_ent)
-	    rag:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
-	    self.rag = rag
+        if rag then
+	        rag:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
+	        self.rag = rag
+        end
     end
 
     automobiles_lib.seats_create(self)
@@ -301,43 +358,55 @@ function automobiles_lib.on_activate(self, staticdata, dtime_s)
     if self._gauge_pointer_ent then pointer_entity = self._gauge_pointer_ent end
     if self._fuel_gauge_pos then
         local fuel_gauge=minetest.add_entity(pos, pointer_entity)
-        fuel_gauge:set_attach(self.object,'',self._fuel_gauge_pos,{x=0,y=0,z=0})
-        self.fuel_gauge = fuel_gauge
+        if fuel_gauge then
+            fuel_gauge:set_attach(self.object,'',self._fuel_gauge_pos,{x=0,y=0,z=0})
+            self.fuel_gauge = fuel_gauge
+        end
     end
 
     if self._front_lights then
         local lights = minetest.add_entity(pos,self._front_lights)
-        lights:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
-        self.lights = lights
-        self.lights:set_properties({is_visible=true})
+        if lights then
+            lights:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
+            self.lights = lights
+            self.lights:set_properties({is_visible=true})
+        end
     end
 
     if self._rear_lights then
         local r_lights = minetest.add_entity(pos,self._rear_lights)
-        r_lights:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
-        self.r_lights = r_lights
-        self.r_lights:set_properties({is_visible=true})
+        if r_lights then
+            r_lights:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
+            self.r_lights = r_lights
+            self.r_lights:set_properties({is_visible=true})
+        end
     end
 
     if self._reverse_lights then
         local reverse_lights = minetest.add_entity(pos,self._reverse_lights)
-        reverse_lights:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
-        self.reverse_lights = reverse_lights
-        self.reverse_lights:set_properties({is_visible=true})
+        if reverse_lights then
+            reverse_lights:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
+            self.reverse_lights = reverse_lights
+            self.reverse_lights:set_properties({is_visible=true})
+        end
     end
 
     if self._turn_left_lights then
         local turn_l_light = minetest.add_entity(pos,self._turn_left_lights)
-        turn_l_light:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
-        self.turn_l_light = turn_l_light
-        self.turn_l_light:set_properties({is_visible=true})
+        if turn_l_light then
+            turn_l_light:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
+            self.turn_l_light = turn_l_light
+            self.turn_l_light:set_properties({is_visible=true})
+        end
     end
 
     if self._turn_right_lights then
         local turn_r_light = minetest.add_entity(pos,self._turn_right_lights)
-        turn_r_light:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
-        self.turn_r_light = turn_r_light
-        self.turn_r_light:set_properties({is_visible=true})
+        if turn_r_light then
+            turn_r_light:set_attach(self.object,'',{x=0,y=0,z=0},{x=0,y=0,z=0})
+            self.turn_r_light = turn_r_light
+            self.turn_r_light:set_properties({is_visible=true})
+        end
     end
 
     if self._extra_items_function then
@@ -359,6 +428,7 @@ end
 
 function automobiles_lib.on_step(self, dtime)
     automobiles_lib.stepfunc(self, dtime)
+
     --[[sound play control]]--
     self._last_time_collision_snd = self._last_time_collision_snd + dtime
     if self._last_time_collision_snd > 1 then self._last_time_collision_snd = 1 end
@@ -368,6 +438,8 @@ function automobiles_lib.on_step(self, dtime)
 
     --in case it's not declared
     self._max_acc_factor = self._max_acc_factor or 1
+    self._vehicle_scale = self._vehicle_scale or 1
+    self._vehicle_power_scale = self._vehicle_power_scale or self._vehicle_scale
 
     local rotation = self.object:get_rotation()
     local yaw = rotation.y
@@ -387,18 +459,19 @@ function automobiles_lib.on_step(self, dtime)
     local dynamic_later_drag = self._LATER_DRAG_FACTOR
     if longit_speed > 2 then dynamic_later_drag = 2.0 end
     if longit_speed > 8 then dynamic_later_drag = 0.5 end
+    --core.chat_send_all(dump(longit_speed))
 
-    if automobiles_lib.extra_drift and longit_speed > 4 then
+    if automobiles_lib.extra_drift and longit_speed > (4*self._vehicle_power_scale) then
         dynamic_later_drag = dynamic_later_drag/(longit_speed*2)
     end
 
-    local later_drag = 0
+    local later_drag = vector.new()
     if self._is_motorcycle == true then
         later_drag = vector.multiply(nhdir,later_speed*
             later_speed*self._LATER_DRAG_FACTOR*-1*automobiles_lib.sign(later_speed))
     else
         later_drag = vector.multiply(nhdir,later_speed*
-        later_speed*dynamic_later_drag*-1*automobiles_lib.sign(later_speed))
+            later_speed*dynamic_later_drag*-1*automobiles_lib.sign(later_speed))
     end
 
     local accel = vector.add(longit_drag,later_drag)
@@ -514,23 +587,23 @@ function automobiles_lib.on_step(self, dtime)
         --control
         local steering_angle_max = 40
         local steering_speed = 40
-        if math.abs(longit_speed) > 3 then
+        if math.abs(longit_speed) > 3*self._vehicle_scale then
             local mid_speed = (steering_speed/2)
-            steering_speed = mid_speed + mid_speed / math.abs(longit_speed*0.25)
+            steering_speed = (mid_speed + (mid_speed / math.abs(longit_speed*0.25))*self._vehicle_scale)
         end
 
         --adjust engine parameter (transmission emulation)
         local acc_factor = self._max_acc_factor
-        local transmission_state = automobiles_lib.get_transmission_state(longit_speed, self._max_speed)
+        local transmission_state = automobiles_lib.get_transmission_state(self, longit_speed, self._max_speed)
 
         local target_acc_factor = acc_factor
 
         if self._have_transmission ~= false then
             if transmission_state == 1 then
-                target_acc_factor = (self._max_acc_factor/3)
+                target_acc_factor = (acc_factor/3)
             end
             if transmission_state == 2 then
-                target_acc_factor = (self._max_acc_factor/2)
+                target_acc_factor = (acc_factor/2)
             end
             self._transmission_state = transmission_state
         end
@@ -542,6 +615,7 @@ function automobiles_lib.on_step(self, dtime)
             control = self._control_function
         end
 		accel, stop = control(self, dtime, hull_direction, longit_speed, longit_drag, later_drag, accel, target_acc_factor, self._max_speed, steering_angle_max, steering_speed)
+        --accel = vector.multiply(accel, self._vehicle_power_scale)
     else
         self._show_lights = false
         if self.sound_handle ~= nil then
@@ -686,22 +760,23 @@ function automobiles_lib.on_step(self, dtime)
         self.object:set_acceleration({x=0,y=0,z=0})
         self.object:set_velocity({x=0,y=0,z=0})
     else
-        self._last_accel = accel
         self.object:move_to(curr_pos)
         --airutils.set_acceleration(self.object, new_accel)
         local limit = (self._max_speed/self.dtime)
         if accel.y > limit then accel.y = limit end --it isn't a rocket :/
+        self._last_accel = accel
     end
 
     self._last_ground_check = self._last_ground_check + dtime
     if self._last_ground_check > 0.18 then
         self._last_ground_check = 0
-        automobiles_lib.ground_get_distances(self, 0.372, (self._front_suspension_pos.z)/10)
+        automobiles_lib.ground_get_distances(self, 0.372*self._vehicle_scale, (self._front_suspension_pos.z*self._vehicle_scale)/10)
     end
 	local newpitch = self._pitch --velocity.y * math.rad(6)
 
-    local newroll = 0
+    local newroll = self._roll or 0
     if self._is_flying == 1 then
+        newpitch = 0
         local turn_effect_speed = longit_speed
         if turn_effect_speed > 10 then turn_effect_speed = 10 end
         newroll = (-self._steering_angle/100)*(turn_effect_speed/10)
@@ -738,6 +813,7 @@ function automobiles_lib.on_step(self, dtime)
                 newroll = tilt_effect * -1
                 self.front_suspension:set_rotation({x=0,y=0,z=tilt_effect})
                 self.rear_suspension:set_rotation({x=0,y=0,z=tilt_effect})
+                newroll = newroll + (self._roll or 0)
 
 
                 if (noded and noded.drawtype ~= 'airlike') then
@@ -745,7 +821,7 @@ function automobiles_lib.on_step(self, dtime)
                         local min_later_speed = self._min_later_speed or 3
                         local speed_for_smoke = min_later_speed / 2
                         if (later_speed > speed_for_smoke or later_speed < -speed_for_smoke) and not self._is_motorcycle then
-                            automobiles_lib.add_smoke(curr_pos, yaw, self._rear_wheel_xpos)
+                            automobiles_lib.add_smoke(self, curr_pos, yaw, self._rear_wheel_xpos*self._vehicle_scale)
                             if automobiles_lib.extra_drift == false then  --disables the sound when playing drift game.. it's annoying
                                 if self._last_time_drift_snd >= 2.0 and (later_speed > min_later_speed or later_speed < -min_later_speed) then
                                     self._last_time_drift_snd = 0
@@ -765,8 +841,8 @@ function automobiles_lib.on_step(self, dtime)
 
 
             else
-                self.front_suspension:set_rotation({x=0,y=0,z=0})
-                self.rear_suspension:set_rotation({x=0,y=0,z=0})
+                if self.front_suspension then self.front_suspension:set_rotation({x=0,y=0,z=0}) end
+                if self.rear_suspension then self.rear_suspension:set_rotation({x=0,y=0,z=0}) end
             end
         end
     end

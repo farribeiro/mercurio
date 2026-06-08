@@ -2,7 +2,7 @@ function steampunk_blimp.clamp(value, min, max)
     local retVal = value
     if value < min then retVal = min end
     if value > max then retVal = max end
-    --minetest.chat_send_all(value .. " - " ..retVal)
+    --core.chat_send_all(value .. " - " ..retVal)
     return retVal
 end
 
@@ -11,7 +11,7 @@ function steampunk_blimp.reclamp(value, min, max)
     local mid = (max-min)/2
     if value > min and value <= (min+mid) then retVal = min end
     if value < max and value > (max-mid) then retVal = max end
-    --minetest.chat_send_all(value .. " - return: " ..retVal .. " - mid: " .. mid)
+    --core.chat_send_all(value .. " - return: " ..retVal .. " - mid: " .. mid)
     return retVal
 end
 
@@ -62,7 +62,8 @@ function steampunk_blimp.boat_upper_deck_map(pos, dpos)
 
     new_pos.z = steampunk_blimp.clamp(new_pos.z, -47, -16)
     new_pos = is_obstacle_zone(new_pos, {x=4, z=-28}, {x=-4, z=-20}) --timao
-    new_pos = is_obstacle_zone(new_pos, {x=-30, z=-24}, {x=4, z=-12})
+    --new_pos = is_obstacle_zone(new_pos, {x=-30, z=-24}, {x=4, z=-12})
+    --core.chat_send_all(dump(position.z))
 
     if position.z >= -49 and position.z < -32 then --limit 10
         new_pos.y = 20.821
@@ -80,6 +81,7 @@ function steampunk_blimp.boat_upper_deck_map(pos, dpos)
         end
         return new_pos
     end
+    
     return new_pos
 end
 
@@ -179,7 +181,7 @@ function steampunk_blimp.navigate_deck(pos, dpos, player)
         local ctrl = player:get_player_control()
         if ctrl.jump or ctrl.sneak then --ladder
             if ladder_zone then
-                --minetest.chat_send_all(dump(pos))
+                --core.chat_send_all(dump(pos))
                 if ctrl.jump then
                     pos_d.y = pos_d.y + 0.9
                     if pos_d.y > upper_deck_y then pos_d.y = upper_deck_y end
@@ -191,7 +193,7 @@ function steampunk_blimp.navigate_deck(pos, dpos, player)
             end
         end
     end
-    --minetest.chat_send_all(dump(pos_d))
+    --core.chat_send_all(dump(pos_d))
 
     return pos_d
 end
@@ -239,7 +241,7 @@ local function get_result_pos(self, player, index)
             self._passengers_base_pos[index].dist_moved = self._passengers_base_pos[index].dist_moved + move;
             if math.abs(self._passengers_base_pos[index].dist_moved) > 5 then
                 self._passengers_base_pos[index].dist_moved = 0
-                minetest.sound_play({name = steampunk_blimp.steps_sound.name},
+                core.sound_play({name = steampunk_blimp.steps_sound.name},
                     {object = player, gain = steampunk_blimp.steps_sound.gain,
                         max_hear_distance = 5,
                         ephemeral = true,})
@@ -262,10 +264,26 @@ function steampunk_blimp.move_persons(self)
     --self._passenger = nil
     if self.object == nil then return end
 
+    --======================================================
+    --[[if steampunk_blimp.profiler_is_on == true then
+        if self.profiler_counter1 == nil then
+            self.profiler_counter1 = 0
+            self.profiler_sum1 = 0
+            self.profiler_counter2 = 0
+            self.profiler_sum2 = 0
+        end
+    else
+        self.profiler_counter1 = 0
+        self.profiler_sum1 = 0
+        self.profiler_counter2 = 0
+        self.profiler_sum2 = 0
+    end]]--
+    --======================================================
+
     for i = steampunk_blimp.max_seats,1,-1
     do
         local player = nil
-        if self._passengers[i] then player = minetest.get_player_by_name(self._passengers[i]) end
+        if self._passengers[i] then player = core.get_player_by_name(self._passengers[i]) end
 
         if self.driver_name and self._passengers[i] == self.driver_name then
             --clean driver if it's nil
@@ -275,7 +293,7 @@ function steampunk_blimp.move_persons(self)
             end
         else
             if self._passengers[i] ~= nil then
-                --minetest.chat_send_all("pass: "..dump(self._passengers[i]))
+                --core.chat_send_all("pass: "..dump(self._passengers[i]))
                 --the rest of the passengers
                 if player then
                     if self._passenger_is_sit[i] == 0 then
@@ -286,27 +304,71 @@ function steampunk_blimp.move_persons(self)
                             local new_pos = steampunk_blimp.copy_vector(self._passengers_base_pos[i])
                             new_pos.x = new_pos.x - result_pos.z
                             new_pos.z = new_pos.z - result_pos.x
-                            --minetest.chat_send_all(dump(new_pos))
+                            --core.chat_send_all(dump(new_pos))
                             local pos_d = steampunk_blimp.navigate_deck(self._passengers_base_pos[i], new_pos, player)
-                            --minetest.chat_send_all(dump(height))
-                            self._passengers_base_pos[i] = steampunk_blimp.copy_vector(pos_d)
-                            self._passengers_base[i]:set_attach(self.object,'',self._passengers_base_pos[i],{x=0,y=0,z=0})
+                            --core.chat_send_all(dump(height))
+
+                            if (self._passengers_base_pos[i].x ~= pos_d.x or self._passengers_base_pos[i].z ~= pos_d.z or self._passengers_base_pos[i].y ~= pos_d.y) then
+                                --or self.profiler_counter1 == 1000 then --vai entrar sempre qdo for maior ou igual a 100
+                                --core.chat_send_all(dump(self.dtime))
+                                self._passengers_base_pos[i] = steampunk_blimp.copy_vector(pos_d)
+                                self._passengers_base[i]:set_attach(self.object,'',self._passengers_base_pos[i],{x=0,y=0,z=0})
+                            end
                         end
-                        --minetest.chat_send_all(dump(self._passengers_base_pos[i]))
+                        --core.chat_send_all(dump(self._passengers_base_pos[i]))
                         player:set_attach(self._passengers_base[i], "", {x = 0, y = 0, z = 0}, {x = 0, y = y_rot, z = 0})
-                    else
-                        local y_rot = 0
-                        if self._passenger_is_sit[i] == 1 then y_rot = 0 end
-                        if self._passenger_is_sit[i] == 2 then y_rot = 90 end
-                        if self._passenger_is_sit[i] == 3 then y_rot = 180 end
-                        if self._passenger_is_sit[i] == 4 then y_rot = 270 end
-                        player:set_attach(self._passengers_base[i], "", {x = 0, y = 3.6, z = 0}, {x = 0, y = y_rot, z = 0})
-                        airutils.sit(player)
                     end
                 end
             end
         end
     end
+    --[[if steampunk_blimp.profiler_is_on == true then
+        if self.profiler_counter1 < 1000 then
+            self.profiler_counter1 = self.profiler_counter1 + 1
+            self.profiler_sum1 = self.profiler_sum1 + self.dtime
+        end
+        if self.profiler_counter1 == 1000 then
+            self.profiler_counter2 = self.profiler_counter2 + 1
+            self.profiler_sum2 = self.profiler_sum2 + self.dtime
+        end
+        if self.profiler_counter2 == 1000 then
+            steampunk_blimp.profiler_is_on = false
+            --TODO printar resultados
+            core.chat_send_player(steampunk_blimp.profiler_name,core.colorize('#00ff00', " >>> blocking attach update: "..self.profiler_sum1))
+            core.chat_send_player(steampunk_blimp.profiler_name,core.colorize('#ff0000', " >>> free attach update: "..self.profiler_sum2))
+        end
+    end]]--
+    
 end
 
+--[[steampunk_blimp.profiler_is_on = false
+steampunk_blimp.profiler_name = ""
+core.register_chatcommand("run_profiler", {
+	params = "",
+	description = "Sum 100 cycles of dtime with and without comparing player movement on deck",
+	privs = {interact = true},
+	func = function(name, param)
+        local colorstring = core.colorize('#ff0000', " >>> you are not inside a blimp")
+        local player = core.get_player_by_name(name)
+        local attached_to = player:get_attach()
+
+		if attached_to ~= nil then
+            local seat = attached_to:get_attach()
+            if seat ~= nil then
+                local entity = seat:get_luaentity()
+                if entity then
+                    if entity.name == "steampunk_blimp:blimp" or entity.name == "steampunk_blimp:cannon_blimp" then
+                        steampunk_blimp.profiler_is_on = true
+                        steampunk_blimp.profiler_name = name
+                        core.chat_send_player(name,core.colorize('#0000ff', " >>> profiler started"))
+                    else
+			            core.chat_send_player(name,colorstring)
+                    end
+                end
+            end
+		else
+			core.chat_send_player(name,colorstring)
+		end
+	end
+})]]--
 

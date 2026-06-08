@@ -34,13 +34,11 @@ mobs:register_mob("dmobs:owl", {
 
 		self.tod_count = (self.tod_count or 0) + dtime
 
-		if self.tod_count < 5 then
-			return
-		end
+		if self.tod_count < 5 then return end
 
 		self.tod_count = 0
 
-		local daytime = minetest.get_timeofday() * 24000
+		local daytime = core.get_timeofday() * 24000
 
 		if daytime <= 6000 then
 

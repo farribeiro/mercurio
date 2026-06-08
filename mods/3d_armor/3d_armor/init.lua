@@ -1,9 +1,18 @@
+if not core.features.use_texture_alpha_string_modes then
+	error("3d_armor requires Luanti/Minetest 5.4.0 or newer. Please update.")
+end
+
 local modname = minetest.get_current_modname()
 local modpath = minetest.get_modpath(modname)
 local worldpath = minetest.get_worldpath()
 local last_punch_time = {}
 local timer = 0
 
+armor = {
+	version = "0.4.13"
+}
+
+dofile(modpath.."/gamecompat.lua")
 dofile(modpath.."/api.lua")
 
 -- local functions
@@ -66,17 +75,6 @@ end
 -- Convert set_elements to a Lua table splitting on blank spaces
 local t_set_elements = armor.config.set_elements
 armor.config.set_elements = string.split(t_set_elements, " ")
-
--- Remove torch damage if fire_protect_torch == false
-if armor.config.fire_protect_torch == false and armor.config.fire_protect == true then
-	for k,v in pairs(armor.fire_nodes) do
-		for k2,v2 in pairs(v) do
-			if string.find (v2,"torch") then
-				armor.fire_nodes[k] = nil
-			end
-		end
-	end
-end
 
 -- Mod Compatibility
 
@@ -474,26 +472,25 @@ minetest.register_globalstep(function(dtime)
 	end
 end)
 
-if armor.config.fire_protect == true then
+if armor.config.fire_protect then
 
-	-- make torches hurt
-	minetest.override_item("default:torch", {damage_per_second = 1})
-	minetest.override_item("default:torch_wall", {damage_per_second = 1})
-	minetest.override_item("default:torch_ceiling", {damage_per_second = 1})
+	if core.get_modpath("default") and armor.config.fire_protect_torch then
+		-- make torches hurt
+		minetest.override_item("default:torch", {damage_per_second = 1})
+		minetest.override_item("default:torch_wall", {damage_per_second = 1})
+		minetest.override_item("default:torch_ceiling", {damage_per_second = 1})
+	end
 
 	-- check player damage for any hot nodes we may be protected against
 	minetest.register_on_player_hpchange(function(player, hp_change, reason)
 
 		if reason.type == "node_damage" and reason.node then
 			-- fire protection
-			if armor.config.fire_protect == true and hp_change < 0 then
+			if armor.config.fire_protect and hp_change < 0 then
 				local name = player:get_player_name()
-				for _,igniter in pairs(armor.fire_nodes) do
-					if reason.node == igniter[1] then
-						if armor.def[name].fire >= igniter[2] then
-							hp_change = 0
-						end
-					end
+				local fire_prot = armor.fire_nodes[reason.node]
+				if fire_prot and armor.def[name].fire >= fire_prot then
+					hp_change = 0
 				end
 			end
 		end

@@ -35,7 +35,6 @@ local gdragon_base = {
 	},
 	walk_velocity = 3,
 	run_velocity = 5,
-	jump = true,
 	fly = true,
 	fly_in = {
 		"air","default:water_source","default:water_flowing",
@@ -71,6 +70,6 @@ mobs:register_mob("dmobs:dragon_great", dmobs.deepclone(gdragon_base))
 gdragon_base.type = "npc"
 gdragon_base.attacks_monsters = true
 gdragon_base.on_rightclick = dmobs.dragon.ride
-gdragon_base.do_custom = dmobs.dragon.do_custom
+gdragon_base.do_custom = dmobs.dragon.step_custom
 
 mobs:register_mob("dmobs:dragon_great_tame", dmobs.deepclone(gdragon_base))

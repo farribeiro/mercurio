@@ -4,7 +4,8 @@
 
 draconis = {
 	wyverns = {},
-	force_storage_save = false
+	force_storage_save = false,
+	S = minetest.get_translator(minetest.get_current_modname())
 }
 
 local path = minetest.get_modpath("draconis")
@@ -25,7 +26,7 @@ draconis.sounds = {
     dirt = {}
 }
 
-if minetest.get_modpath("default") then
+if minetest.get_modpath("default") and default then
     if default.node_sound_wood_defaults then
         draconis.sounds.wood = default.node_sound_wood_defaults()
     end
@@ -112,7 +113,7 @@ dofile(path.."/nodes.lua")
 dofile(path.."/craftitems.lua")
 dofile(path.."/api/libri.lua")
 
-if minetest.get_modpath("3d_armor") then
+if minetest.get_modpath("3d_armor") and armor then
     dofile(path.."/armor.lua")
 end
 
@@ -135,7 +136,7 @@ end)
 
 dofile(path.."/mapgen.lua")
 
-local simple_spawning = minetest.settings:get_bool("simple_spawning") or false
+local simple_spawning = minetest.settings:get_bool("simple_spawning", false)
 
 local spawn_rate = tonumber(minetest.settings:get("simple_spawn_rate")) or 80000
 
@@ -158,13 +159,13 @@ end
 
 -- Aliases --
 
-minetest.register_alias("draconis:dracolily_fire", "air")
-minetest.register_alias("draconis:dracolily_ice", "air")
+--minetest.register_alias("draconis:dracolily_fire", "air")
+--minetest.register_alias("draconis:dracolily_ice", "air")
 
-minetest.register_alias("draconis:blood_fire_dragon", "")
-minetest.register_alias("draconis:blood_ice_dragon", "")
+--minetest.register_alias("draconis:blood_fire_dragon", "")
+--minetest.register_alias("draconis:blood_ice_dragon", "")
 
-minetest.register_alias("draconis:manuscript", "")
+--minetest.register_alias("draconis:manuscript", "")
 
 for color in pairs(draconis.colors_ice) do
     minetest.register_alias("draconis:egg_ice_dragon_" .. color, "draconis:egg_ice_" .. color)

@@ -2,6 +2,8 @@
 -- Behaviors --
 ---------------
 
+local S = draconis.S
+
 draconis.fire_dragon_targets = {}
 
 draconis.ice_dragon_targets = {}
@@ -155,7 +157,8 @@ creatura.register_movement_method("draconis:fly_pathfind", function(self)
 	local steer_to
 	local steer_timer = 0.01
 	local width = self.width
-	local wayp_threshold = width + (width / self.turn_rate)
+	local turn_rate = self.turn_rate or 6
+	local wayp_threshold = width + (width / turn_rate)
 
 	self:set_gravity(0)
 	local function func(_self, goal, speed_x)
@@ -184,7 +187,7 @@ creatura.register_movement_method("draconis:fly_pathfind", function(self)
 		end
 		local goal_yaw = dir2yaw(goal_dir)
 		local speed = (_self.speed or 24) * speed_x
-		_self:tilt_to(goal_yaw, _self.turn_rate or 6)
+		_self:tilt_to(goal_yaw, turn_rate)
 		-- Set Velocity
 		_self:set_forward_velocity(speed)
 		_self:set_vertical_velocity(speed * goal_dir.y)
@@ -196,7 +199,8 @@ creatura.register_movement_method("draconis:fly_simple", function(self)
 	local steer_to
 	local steer_timer = 0.25
 	local width = self.width
-	local wayp_threshold = width + (width / self.turn_rate)
+	local turn_rate = self.turn_rate or 6
+	local wayp_threshold = width + (width / turn_rate)
 
 	self:set_gravity(0)
 	local function func(_self, goal, speed_factor)
@@ -211,7 +215,6 @@ creatura.register_movement_method("draconis:fly_simple", function(self)
 		steer_timer = (steer_timer > 0 and steer_timer - self.dtime) or 0.25
 		steer_to = (steer_timer <= 0 and creatura.get_context_steering(self, goal, 4)) or steer_to
 		local speed = abs(_self.speed or 2) * speed_factor or 0.5
-		local turn_rate = abs(_self.turn_rate or 5)
 		-- Apply Movement
 		local dir = (steer_to or vec_dir(pos, goal))
 		_self:set_forward_velocity(speed)
@@ -905,7 +908,7 @@ creatura.register_utility("draconis:wyvern_breaking", function(self, player)
 					texture = texture,
 				})
 				minetest.chat_send_player(player:get_player_name(),
-					"The Jungle Wyvern ate some " .. def.description .. "! Taming is at " .. taming .. "%")
+					S("The Jungle Wyvern ate some @1! Taming is at @2%", def.description, taming))
 			else
 				draconis.detach_player(_self, player)
 				return true
@@ -913,7 +916,7 @@ creatura.register_utility("draconis:wyvern_breaking", function(self, player)
 			feed_timer = 10
 		end
 		if taming >= 100 then
-			minetest.chat_send_player(player:get_player_name(), "The Jungle Wyvern has been tamed!")
+			minetest.chat_send_player(player:get_player_name(), S("The Jungle Wyvern has been tamed!"))
 			_self.owner = _self:memorize("owner", player:get_player_name())
 			return true
 		end

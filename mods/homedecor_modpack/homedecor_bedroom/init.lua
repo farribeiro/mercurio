@@ -1,6 +1,10 @@
-local S = minetest.get_translator("homedecor_bedroom")
+local S = core.get_translator("homedecor_bedroom")
 
-local sc_disallow = minetest.get_modpath("screwdriver") and screwdriver.disallow or nil
+if unifieddyes and not unifieddyes.preserve_metadata then
+	error("Incompatible version of unifieddyes found. Please update it to the latest version.")
+end
+
+local sc_disallow = core.get_modpath("screwdriver") and screwdriver.disallow or nil
 
 local wood_tex, wool_tex = homedecor.textures.wood.apple.planks, homedecor.textures.wool.white
 
@@ -33,7 +37,7 @@ local kbed_cbox = {
 }
 
 
-local bed_def = minetest.registered_nodes["beds:bed"]
+local bed_def = core.registered_nodes["beds:bed"]
 local bed_on_rightclick = bed_def and bed_def.on_rightclick or nil
 
 homedecor.register("bed_regular", {
@@ -66,7 +70,7 @@ homedecor.register("bed_regular", {
 	after_dig_node = function(pos, oldnode, oldmetadata, digger)
 		homedecor.unextend_bed(pos)
 	end,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		local itemname = itemstack:get_name()
 		if itemname == "homedecor:bed_regular" then
@@ -110,7 +114,7 @@ homedecor.register("bed_extended", {
 	after_dig_node = function(pos, oldnode, oldmetadata, digger)
 		homedecor.unextend_bed(pos)
 	end,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		if bed_on_rightclick then
 			bed_on_rightclick(pos, node, clicker)
@@ -151,7 +155,7 @@ homedecor.register("bed_kingsize", {
 			inv:add_item("main", "homedecor:bed_regular 2")
 		end
 	end,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		if bed_on_rightclick then
 			bed_on_rightclick(pos, node, clicker)
@@ -256,7 +260,7 @@ for _, color in ipairs(bedcolors) do
 	table.insert(old_bed_nodes, "homedecor:bed_"..color.."_kingsize")
 end
 
-minetest.register_lbm({
+core.register_lbm({
 	name = ":homedecor:convert_beds",
 	label = "Convert homedecor static bed nodes to use param2 color",
 	run_at_every_load = false,
@@ -297,8 +301,8 @@ minetest.register_lbm({
 			new_name = "homedecor:bed_kingsize"
 		end
 
-		minetest.set_node(pos, { name = new_name, param2 = param2 })
-		local meta = minetest.get_meta(pos)
+		core.node(pos, { name = new_name, param2 = param2 })
+		local meta = core.get_meta(pos)
 		meta:set_string("dye", "unifieddyes:"..color)
 	end
 })
@@ -306,7 +310,7 @@ minetest.register_lbm({
 -- crafting
 
 
-minetest.register_craft( {
+core.register_craft( {
         output = "homedecor:nightstand_oak_one_drawer",
         recipe = {
                 { "homedecor:drawer_small" },
@@ -314,13 +318,13 @@ minetest.register_craft( {
         },
 })
 
-minetest.register_craft({
+core.register_craft({
         type = "fuel",
         recipe = "homedecor:nightstand_oak_one_drawer",
         burntime = 30,
 })
 
-minetest.register_craft( {
+core.register_craft( {
         output = "homedecor:nightstand_oak_two_drawers",
         recipe = {
                 { "homedecor:drawer_small" },
@@ -329,7 +333,7 @@ minetest.register_craft( {
         },
 })
 
-minetest.register_craft( {
+core.register_craft( {
         output = "homedecor:nightstand_oak_two_drawers",
         recipe = {
                 { "homedecor:nightstand_oak_one_drawer" },
@@ -337,7 +341,7 @@ minetest.register_craft( {
         },
 })
 
-minetest.register_craft({
+core.register_craft({
         type = "fuel",
         recipe = "homedecor:nightstand_oak_two_drawers",
         burntime = 30,
@@ -345,7 +349,7 @@ minetest.register_craft({
 
 --
 
-minetest.register_craft( {
+core.register_craft( {
 	type = "shapeless",
         output = "homedecor:nightstand_mahogany_one_drawer",
         recipe = {
@@ -354,13 +358,13 @@ minetest.register_craft( {
         },
 })
 
-minetest.register_craft({
+core.register_craft({
         type = "fuel",
         recipe = "homedecor:nightstand_mahogany_one_drawer",
         burntime = 30,
 })
 
-minetest.register_craft( {
+core.register_craft( {
 	type = "shapeless",
         output = "homedecor:nightstand_mahogany_two_drawers",
         recipe = {
@@ -369,7 +373,7 @@ minetest.register_craft( {
         },
 })
 
-minetest.register_craft({
+core.register_craft({
         type = "fuel",
         recipe = "homedecor:nightstand_mahogany_two_drawers",
         burntime = 30,

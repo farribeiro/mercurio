@@ -1,4 +1,8 @@
-local S = minetest.get_translator("homedecor_windows_and_treatments")
+local S = core.get_translator("homedecor_windows_and_treatments")
+
+if unifieddyes and not unifieddyes.preserve_metadata then
+	error("Incompatible version of unifieddyes found. Please update it to the latest version.")
+end
 
 homedecor_windows_and_treatments = {}
 
@@ -126,9 +130,9 @@ homedecor.register("curtain_closed", {
 	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		unifieddyes.fix_rotation(pos, placer, itemstack, pointed_thing)
 	end,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-		minetest.set_node(pos, { name = "homedecor:curtain_open", param2 = node.param2 })
+		core.set_node(pos, { name = "homedecor:curtain_open", param2 = node.param2 })
 		return itemstack
 	end
 })
@@ -151,9 +155,9 @@ homedecor.register("curtain_open", {
 	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		unifieddyes.fix_rotation(pos, placer, itemstack, pointed_thing)
 	end,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-		minetest.set_node(pos, { name = "homedecor:curtain_closed", param2 = node.param2 })
+		core.set_node(pos, { name = "homedecor:curtain_closed", param2 = node.param2 })
 		return itemstack
 	end
 })
@@ -265,7 +269,7 @@ homedecor.register("shutter", {
 	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		unifieddyes.fix_rotation(pos, placer, itemstack, pointed_thing)
 	end,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 })
 
 homedecor.register("shutter_colored", {
@@ -285,11 +289,11 @@ homedecor.register("shutter_colored", {
 	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		unifieddyes.fix_rotation(pos, placer, itemstack, pointed_thing)
 	end,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 })
 
-minetest.register_alias("homedecor:shutter_purple", "homedecor:shutter_violet")
-minetest.register_alias("homedecor:shutter_oak", "homedecor:shutter")
+core.register_alias("homedecor:shutter_purple", "homedecor:shutter_violet")
+core.register_alias("homedecor:shutter_oak", "homedecor:shutter")
 
 -- convert old shutters to param2 coloring
 
@@ -299,7 +303,7 @@ for _, color in ipairs(shutters) do
 	table.insert(homedecor_windows_and_treatments.old_shutter_nodes, "homedecor:shutter_"..color)
 end
 
-minetest.register_lbm({
+core.register_lbm({
 	name = ":homedecor:convert_shutters",
 	label = "Convert shutter static nodes to use param2 color",
 	run_at_every_load = false,
@@ -321,8 +325,8 @@ minetest.register_lbm({
 		local paletteidx = unifieddyes.getpaletteidx("unifieddyes:"..color, "wallmounted")
 		local param2 = paletteidx + node.param2
 
-		minetest.set_node(pos, { name = "homedecor:shutter_colored", param2 = param2 })
-		local meta = minetest.get_meta(pos)
+		core.set_node(pos, { name = "homedecor:shutter_colored", param2 = param2 })
+		local meta = core.get_meta(pos)
 		meta:set_string("dye", "unifieddyes:"..color)
 	end
 })
@@ -345,7 +349,7 @@ for _, color in ipairs(curtaincolors) do
 	table.insert(homedecor_windows_and_treatments.old_static_curtain_nodes, "homedecor:curtain_open_"..color)
 end
 
-minetest.register_lbm({
+core.register_lbm({
 	name = ":homedecor:convert_curtains",
 	label = "Convert static curtain nodes to use param2 color",
 	run_at_every_load = false,
@@ -369,8 +373,8 @@ minetest.register_lbm({
 		local paletteidx, _ = unifieddyes.getpaletteidx("unifieddyes:"..metadye, "wallmounted")
 		local newparam2 = paletteidx + (node.param2 % 8)
 
-		minetest.set_node(pos, { name = newnode, param2 = newparam2 })
-		local meta = minetest.get_meta(pos)
+		core.set_node(pos, { name = newnode, param2 = newparam2 })
+		local meta = core.get_meta(pos)
 		meta:set_string("dye", "unifieddyes:"..metadye)
 	end
 })
@@ -378,7 +382,7 @@ minetest.register_lbm({
 -- crafting
 
 
-minetest.register_craft( {
+core.register_craft( {
 	output = "homedecor:shutter 2",
 	recipe = {
 		{ "group:stick", "group:stick" },
@@ -398,14 +402,14 @@ unifieddyes.register_color_craft({
 	}
 })
 
-minetest.register_craft({
+core.register_craft({
         type = "fuel",
         recipe = "homedecor:shutter_oak",
         burntime = 30,
 })
 
 
-minetest.register_craft( {
+core.register_craft( {
 	output = "homedecor:curtain_open 4",
 		recipe = {
 		{ homedecor.materials.wool_white, "", ""},
@@ -414,7 +418,7 @@ minetest.register_craft( {
 	},
 })
 
-minetest.register_craft( {
+core.register_craft( {
 	output = "homedecor:curtain_open 4",
 		recipe = {
 		{ "cottages:wool", "", ""},
@@ -454,7 +458,7 @@ local mats_craft = {
 for i in ipairs(mats_craft) do
 	local material = mats_craft[i][1]
 	local ingredient = mats_craft[i][2]
-	minetest.register_craft( {
+	core.register_craft( {
 		output = "homedecor:curtainrod_"..material.." 3",
 		recipe = {
 			{ ingredient, ingredient, ingredient },
@@ -462,7 +466,7 @@ for i in ipairs(mats_craft) do
 	})
 end
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
     output = "homedecor:window_plain 8",
     recipe = {
@@ -474,7 +478,7 @@ minetest.register_craft({
     }
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
     output = "homedecor:window_quartered",
     recipe = {
@@ -485,7 +489,7 @@ minetest.register_craft({
     }
 })
 
-minetest.register_craft({
+core.register_craft({
     output = "homedecor:blinds_thin",
     recipe = {
 		{ "group:stick", "basic_materials:plastic_sheet", "group:stick" },
@@ -494,7 +498,7 @@ minetest.register_craft({
     },
 })
 
-minetest.register_craft({
+core.register_craft({
     output = "homedecor:blinds_thick",
     recipe = {
 		{ "group:stick", "basic_materials:plastic_sheet", "group:stick" },
@@ -503,7 +507,7 @@ minetest.register_craft({
     },
 })
 
-minetest.register_craft( {
+core.register_craft( {
         output = "homedecor:window_flowerbox",
         recipe = {
             { "homedecor:roof_tile_terracotta", homedecor.materials.dirt, "homedecor:roof_tile_terracotta" },
@@ -511,7 +515,7 @@ minetest.register_craft( {
         },
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "homedecor:stained_glass 8",
 	recipe = {
 		{"", "dye:blue", ""},
@@ -520,7 +524,7 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "homedecor:stained_glass 3",
 	recipe = {
 		{"", "dye:blue", ""},
@@ -529,7 +533,7 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "homedecor:stained_glass 2",
 	recipe = {
 		{"", "dye:blue", ""},
@@ -538,7 +542,7 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "homedecor:stained_glass 2",
 	recipe = {
 		{"", "dye:blue", ""},

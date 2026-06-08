@@ -1,3 +1,6 @@
+* 2026-04-20 : TenPlus1
+  * Updated dragons to use riding functions within mobs redo api.
+  * Tweaked and Tidied code and mob defs.
 * 2021-03-30 : Poikilos
   * Add more details to the panda texture (Change every pixel give or take a few) while reducing the number of pixels.
 * 2021-02-01 : TenPlus1

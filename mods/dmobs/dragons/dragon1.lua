@@ -37,7 +37,6 @@ local dragondef = {
 	},
 	walk_velocity = 3,
 	run_velocity = 5,
-	jump = true,
 	fly = true,
 	fly_in = {
 		"air", "default:water_source", "default:water_flowing",
@@ -79,7 +78,7 @@ mobs:register_mob("dmobs:dragon1", dmobs.deepclone(dragondef))
 dragondef.type = "npc"
 dragondef.attacks_monsters = true
 dragondef.on_rightclick = dmobs.dragon.ride
-dragondef.do_custom = dmobs.dragon.do_custom
+dragondef.do_custom = dmobs.dragon.step_custom
 
 -- The tamed version is registered
 mobs:register_mob("dmobs:dragon_red", dmobs.deepclone(dragondef))

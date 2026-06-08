@@ -1,6 +1,7 @@
 local modpath = core.get_modpath('mtimer')..DIR_DELIM
 local syspath = modpath..'system'..DIR_DELIM
 local fspath = syspath..'formspecs'..DIR_DELIM
+local S = core.get_translator('mtimer')
 
 
 -- Set initial global `mtimer` table
@@ -10,7 +11,9 @@ local fspath = syspath..'formspecs'..DIR_DELIM
 -- @see ./system/formspecs/*
 -- @see ./system/load_configuration.lua
 mtimer = {
-    translator = core.get_translator('mtimer'),
+    mod_title = S('mTimer'),
+    mod_description = S('Ingame timer for showing current playtime, current day time, ingame time, etc.'),
+    translator = S,
     dialog = {},
     meta = {}
 }

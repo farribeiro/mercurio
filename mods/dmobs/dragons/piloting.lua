@@ -1,18 +1,23 @@
 
-dmobs.dragon = dmobs.dragon or {}
-
-
 dmobs.dragon.step_custom = function(self, dtime)
+
+	-- set required values if not already present
+	if not self.v3 then
+		self.v3 = true
+		self.driver_attach_at = {x = 0, y = 1, z = -2}
+		self.driver_eye_offset = {x = 0, y = 3, z = 0}
+		self.driver_scale = {x = 0.5, y = 0.5} -- shrink driver to fit model
+	end
 
 	if self.driver then
 
-		dmobs.object_fly(self, dtime, 10, true, "dmobs:fire_plyr", "walk", "stand")
+		mobs.fly(self, dtime, 10, true, self.arrow, "walk", "stand")
 
 		if self.state == "attack" then
 			self.state = nil
 		end
 
-		return false
+		return false -- skip rest of mob functions
 	end
 
 	return true
@@ -27,19 +32,19 @@ dmobs.dragon.ride = function(self, clicker)
 
 		if self.driver and clicker == self.driver then
 
-			dmobs.object_detach(self, clicker, {x = 1, y = 0, z = 1})
+			mobs.detach(clicker)
 
 			if inv:room_for_item("main", "mobs:saddle") then
 				inv:add_item("main", "mobs:saddle")
 			else
-				minetest.add_item(clicker:get_pos(), "mobs:saddle")
+				core.add_item(clicker:get_pos(), "mobs:saddle")
 			end
 
 		elseif not self.driver then
 
 			if clicker:get_wielded_item():get_name() == "mobs:saddle" then
 
-				dmobs.object_attach(self, clicker, {x = 0, y = 12, z = 4}, {x = 0, y = 0, z = 4})
+				mobs.attach(self, clicker)
 
 				inv:remove_item("main", "mobs:saddle")
 			end
@@ -50,30 +55,9 @@ end
 
 dmobs.dragon.on_rc = function(self, clicker)
 
-	if not clicker or not clicker:is_player() then
-		return
-	end
+	if not clicker or not clicker:is_player() then return end
 
-	if mobs:feed_tame(self, clicker, 1, false, false) then
-		return
-	end
+	if mobs:feed_tame(self, clicker, 1, false, false) then return end
 
 	dmobs.dragon.ride(self, clicker)
-end
-
-
-dmobs.dragon.do_custom = function(self, dtime)
-
-	if self.driver then
-
-		dmobs.object_fly(self, dtime, 10, true, "dmobs:fire_plyr", "walk", "stand")
-
-		if self.state == "attack" then
-			self.state = "idle"
-		end
-
-		return false
-	end
-
-	return true
 end

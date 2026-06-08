@@ -1,6 +1,10 @@
-local S = minetest.get_translator("homedecor_bathroom")
+local S = core.get_translator("homedecor_bathroom")
 
-local sc_disallow = minetest.get_modpath("screwdriver") and screwdriver.disallow or nil
+if unifieddyes and not unifieddyes.preserve_metadata then
+	error("Incompatible version of unifieddyes found. Please update it to the latest version.")
+end
+
+local sc_disallow = core.get_modpath("screwdriver") and screwdriver.disallow or nil
 
 local wood_tex = homedecor.textures.wood.apple.planks
 local water_tex = homedecor.textures.water.tile
@@ -21,7 +25,7 @@ homedecor.register("bathroom_tiles_dark", {
 		key = "node_sound_stone_defaults",
 	},
 	on_construct = unifieddyes.on_construct,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	crafts = {
 		{
 			output = "homedecor:bathroom_tiles_dark 4",
@@ -49,7 +53,7 @@ homedecor.register("bathroom_tiles_medium", {
 		key = "node_sound_stone_defaults",
 	},
 	on_construct = unifieddyes.on_construct,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	crafts = {
 		{
 			output = "homedecor:bathroom_tiles_medium 4",
@@ -77,7 +81,7 @@ homedecor.register("bathroom_tiles_light", {
 		key = "node_sound_stone_defaults",
 	},
 	on_construct = unifieddyes.on_construct,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	crafts = {
 		{
 			output = "homedecor:bathroom_tiles_light 4",
@@ -137,10 +141,10 @@ homedecor.register("medicine_cabinet", {
 	},
 	on_punch = function(pos, node, puncher, pointed_thing)
 		node.name = "homedecor:medicine_cabinet_open"
-		minetest.swap_node(pos, node)
+		core.swap_node(pos, node)
 	end,
 	can_dig = function(pos)
-		local inv = minetest.get_meta(pos):get_inventory("main")
+		local inv = core.get_meta(pos):get_inventory("main")
 		return inv:is_empty("main")
 	end,
 	infotext=S("Medicine cabinet"),
@@ -174,10 +178,10 @@ homedecor.register("medicine_cabinet_open", {
 	drop = "homedecor:medicine_cabinet",
 	on_punch = function(pos, node, puncher, pointed_thing)
 		node.name = "homedecor:medicine_cabinet"
-		minetest.swap_node(pos, node)
+		core.swap_node(pos, node)
 	end,
 	can_dig = function(pos)
-		local inv = minetest.get_meta(pos):get_inventory("main")
+		local inv = core.get_meta(pos):get_inventory("main")
 		return inv:is_empty("main")
 	end,
 })
@@ -214,7 +218,7 @@ homedecor.register("toilet", {
 	},
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		node.name = "homedecor:toilet_open"
-		minetest.set_node(pos, node)
+		core.set_node(pos, node)
 	end,
 	crafts = {
 		{
@@ -245,8 +249,8 @@ homedecor.register("toilet_open", {
 	},
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		node.name = "homedecor:toilet"
-		minetest.set_node(pos, node)
-		minetest.sound_play("homedecor_toilet_flush", {
+		core.set_node(pos, node)
+		core.sound_play("homedecor_toilet_flush", {
 			pos=pos,
 			max_hear_distance = 5,
 			gain = 1,
@@ -336,7 +340,7 @@ homedecor.register("sink", {
 --Taps
 
 local function taps_on_rightclick(pos, node, clicker, itemstack, pointed_thing)
-	local below = minetest.get_node_or_nil({x=pos.x, y=pos.y-1, z=pos.z})
+	local below = core.get_node_or_nil({x=pos.x, y=pos.y-1, z=pos.z})
 	if below and
 	  below.name == "homedecor:shower_tray" or
 	  string.find(below.name, "homedecor:.*sink") then
@@ -475,7 +479,7 @@ homedecor.register("shower_head", {
 	walkable = false,
 	on_rotate = sc_disallow or nil,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-		local below = minetest.get_node_or_nil({x=pos.x, y=pos.y-2.0, z=pos.z})
+		local below = core.get_node_or_nil({x=pos.x, y=pos.y-2.0, z=pos.z})
 		if below and (
 			below.name == "homedecor:shower_tray" or
 			below.name == "homedecor:bathtub_clawfoot_brass_taps" or
@@ -618,20 +622,20 @@ homedecor.register("bathroom_set", {
 
 -- aliases
 
-minetest.register_alias("3dforniture:toilet", "homedecor:toilet")
-minetest.register_alias("3dforniture:toilet_open", "homedecor:toilet_open")
-minetest.register_alias("3dforniture:sink", "homedecor:sink")
-minetest.register_alias("3dforniture:taps", "homedecor:taps")
-minetest.register_alias("3dforniture:shower_tray", "homedecor:shower_tray")
-minetest.register_alias("3dforniture:shower_head", "homedecor:shower_head")
-minetest.register_alias("3dforniture:table_lamp", "homedecor:table_lamp_off")
+core.register_alias("3dforniture:toilet", "homedecor:toilet")
+core.register_alias("3dforniture:toilet_open", "homedecor:toilet_open")
+core.register_alias("3dforniture:sink", "homedecor:sink")
+core.register_alias("3dforniture:taps", "homedecor:taps")
+core.register_alias("3dforniture:shower_tray", "homedecor:shower_tray")
+core.register_alias("3dforniture:shower_head", "homedecor:shower_head")
+core.register_alias("3dforniture:table_lamp", "homedecor:table_lamp_off")
 
-minetest.register_alias("toilet", "homedecor:toilet")
-minetest.register_alias("sink", "homedecor:sink")
-minetest.register_alias("taps", "homedecor:taps")
-minetest.register_alias("shower_tray", "homedecor:shower_tray")
-minetest.register_alias("shower_head", "homedecor:shower_head")
-minetest.register_alias("table_lamp", "homedecor:table_lamp_off")
+core.register_alias("toilet", "homedecor:toilet")
+core.register_alias("sink", "homedecor:sink")
+core.register_alias("taps", "homedecor:taps")
+core.register_alias("shower_tray", "homedecor:shower_tray")
+core.register_alias("shower_head", "homedecor:shower_head")
+core.register_alias("table_lamp", "homedecor:table_lamp_off")
 
 -- convert old static nodes
 
@@ -654,7 +658,7 @@ local old_to_color = {
 	"black"
 }
 
-minetest.register_lbm({
+core.register_lbm({
 	name = ":homedecor:convert_bathroom_tiles",
 	label = "Convert bathroom tiles to use param2 color",
 	run_at_every_load = false,
@@ -678,8 +682,8 @@ minetest.register_lbm({
 
 		local paletteidx = unifieddyes.getpaletteidx("unifieddyes:"..color, "extended")
 
-		minetest.set_node(pos, { name = newname, param2 = paletteidx })
-		local meta = minetest.get_meta(pos)
+		core.set_node(pos, { name = newname, param2 = paletteidx })
+		local meta = core.get_meta(pos)
 		meta:set_string("dye", "unifieddyes:"..color)
 		meta:set_string("palette", "ext")
 	end

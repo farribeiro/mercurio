@@ -18,12 +18,12 @@ function place_in_air(itemstack, user, pointed_thing)
 
 	pos = vector.add(pos, look_dir)
 
-	minetest.set_node(pos, {name = itemstack:get_name()})
+	core.set_node(pos, {name = itemstack:get_name()})
 	itemstack:take_item(1)
 	return itemstack
 end
 
-minetest.register_node("etherium_stuff:sand", {
+core.register_node("etherium_stuff:sand", {
 	description = S("Etherium Sand"),
 	tiles = {"etherium_sand.png"},
 	groups = {crumbly = 3, falling_node = 1},
@@ -32,7 +32,7 @@ minetest.register_node("etherium_stuff:sand", {
 })
 
 
-minetest.register_node("etherium_stuff:sandstone", {
+core.register_node("etherium_stuff:sandstone", {
 	description = S("Etherium Sandstone"),
 	tiles = {"etherium_sandstone.png"},
 	groups = {crumbly = 1, cracky = 3},
@@ -40,7 +40,7 @@ minetest.register_node("etherium_stuff:sandstone", {
 	on_secondary_use = place_in_air
 })
 
-minetest.register_node("etherium_stuff:sandstone_brick", {
+core.register_node("etherium_stuff:sandstone_brick", {
 	description = S("Etherium Sandstone Brick"),
 	paramtype2 = "facedir",
 	place_param2 = 0,
@@ -51,7 +51,7 @@ minetest.register_node("etherium_stuff:sandstone_brick", {
 	on_secondary_use = place_in_air
 })
 
-minetest.register_node("etherium_stuff:sandstone_block", {
+core.register_node("etherium_stuff:sandstone_block", {
 	description = S("Etherium Sandstone Block"),
 	tiles = {"etherium_sandstone_block.png"},
 	is_ground_content = false,
@@ -60,7 +60,7 @@ minetest.register_node("etherium_stuff:sandstone_block", {
 	on_secondary_use = place_in_air
 })
 
-minetest.register_node("etherium_stuff:glass", {
+core.register_node("etherium_stuff:glass", {
 	description = S("Etherium Glass"),
 	drawtype = "glasslike_framed_optional",
 	tiles = {"etherium_glass.png", "etherium_glass_detail.png"},
@@ -72,7 +72,7 @@ minetest.register_node("etherium_stuff:glass", {
 	on_secondary_use = place_in_air
 })
 
-minetest.register_node("etherium_stuff:crystal_glass", {
+core.register_node("etherium_stuff:crystal_glass", {
 	description = S("Etherium Crystal Glass"),
 	drawtype = "glasslike_framed_optional",
 	tiles = {"etherium_crystal_glass.png", "etherium_crystal_glass_detail.png"},
@@ -85,7 +85,7 @@ minetest.register_node("etherium_stuff:crystal_glass", {
 	on_secondary_use = place_in_air
 })
 
-minetest.register_node("etherium_stuff:sandstone_light_block", {
+core.register_node("etherium_stuff:sandstone_light_block", {
 	description = S("Etherium Sandstone Light Block"),
 	tiles = {"etherium_sandstone_light_block.png"},
 	paramtype = "light",

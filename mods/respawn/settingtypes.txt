@@ -5,3 +5,6 @@ enable_team_respawn (Enable team respawn) bool false
 # When enabled, players can respawn in their home place, if they defined one
 # using the command: /set_own_place home.
 enable_home_respawn (Enable home respawn) bool false
+
+# When enabled, display the place's name in the HUD when entering its area
+show_place_hud (Show place HUD) bool true

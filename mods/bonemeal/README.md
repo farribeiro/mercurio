@@ -193,6 +193,14 @@ https://forum.minetest.net/viewtopic.php?f=9&t=16446
   give bonemeal
 * Added bushes_classic support
 
+## Version 1.8
+
+* Add Ethereal mushroom and mangrove support
+* Add Farming Redo kiwi support
+* Tweak n Tidy code
+* Update textures and add new sfx
+* Use next_plant when found in crops
+
 ## LICENSE
 
 Licence: Code is MIT, Media is CC0

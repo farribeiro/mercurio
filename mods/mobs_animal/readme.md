@@ -42,4 +42,4 @@ These monochrome cuties spawn in Ethereal's bamboo biome and can be tamed with b
 ---
 *Note: After breeding, animals need to rest for 4 minutes and baby animals take 4 minutes to grow up, also feeding them helps them grow quicker...*
 
-#### Lucky Blocks: 20
+#### Lucky Blocks: 21

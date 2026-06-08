@@ -12,6 +12,7 @@ xcompat.materials = dofile(modpath .. "/src/materials.lua")
 xcompat.textures = dofile(modpath .. "/src/textures.lua")
 xcompat.functions = dofile(modpath .. "/src/functions.lua")
 xcompat.player = dofile(modpath .. "/src/player.lua")
+xcompat.stairs = dofile(modpath .. "/src/stairs.lua")
 
 local function validate_sound(key)
     if key and xcompat.sounds[key] then
@@ -43,7 +44,9 @@ minetest.register_on_mods_loaded(function()
     end
 end)
 
-dofile(modpath .. "/src/commands.lua")
+if minetest.is_singleplayer() then
+	dofile(modpath .. "/src/commands.lua")
+end
 
 if minetest.get_modpath("mtt") and mtt.enabled then
     -- register tests

@@ -2,7 +2,7 @@ mobs:register_mob("dmobs:panda", {
 	type = "animal",
 	passive = false,
 	reach = 1,
-	damage = 2,
+	damage = 2, attack_chance = 98,
 	attack_type = "dogfight",
 	hp_min = 12,
 	hp_max = 22,
@@ -52,11 +52,9 @@ mobs:register_mob("dmobs:panda", {
 
 	on_rightclick = function(self, clicker)
 
-		if mobs:feed_tame(self, clicker, 8, true, true) then
-			return
-		end
-
-		mobs:capture_mob(self, clicker, 0, 5, 50, false, nil)
+		if mobs:protect(self, clicker) then return end
+		if mobs:feed_tame(self, clicker, 8, true, true) then return end
+		if mobs:capture_mob(self, clicker, 0, 5, 50, false, nil) then return end
 	end
 })
 

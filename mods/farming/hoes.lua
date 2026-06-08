@@ -1,29 +1,28 @@
 
 -- translation and mod check
 
-local S = minetest.get_translator("farming")
-local mod_tr = minetest.get_modpath("toolranks")
+local S = core.get_translator("farming")
+local mod_tr = core.get_modpath("toolranks")
+local mod_mcl = core.get_modpath("mcl_core")
 
 -- Hoe registration function
 
-farming.register_hoe = function(name, def)
+function farming.register_hoe(name, def)
 
 	-- Check for : prefix (register new hoes in your mod's namespace)
 	if name:sub(1,1) ~= ":" then name = ":" .. name end
 
 	-- Check def table
-	if def.description == nil then def.description = S("Hoe") end
-
-	if def.inventory_image == nil then def.inventory_image = "unknown_item.png" end
-
-	if def.max_uses == nil then def.max_uses = 30 end
+	def.description = def.description or S("Hoe")
+	def.inventory_image = def.inventory_image or "unknown_item.png"
+	def.max_uses = def.max_uses or 30
 
 	-- add hoe group
 	def.groups = def.groups or {}
 	def.groups.hoe = 1
 
 	-- Register the tool
-	minetest.register_tool(name, {
+	core.register_tool(name, {
 		description = def.description,
 		inventory_image = def.inventory_image,
 		groups = def.groups,
@@ -36,22 +35,11 @@ farming.register_hoe = function(name, def)
 	})
 
 	-- Register its recipe
-	if def.recipe then
+	local recipe = not mod_mcl and (def.recipe or def.material and {
+			{def.material, def.material}, {"", "group:stick"}, {"", "group:stick"} })
 
-		minetest.register_craft({
-			output = name:sub(2),
-			recipe = def.recipe
-		})
-	elseif def.material then
-
-		minetest.register_craft({
-			output = name:sub(2),
-			recipe = {
-				{def.material, def.material, ""},
-				{"", "group:stick", ""},
-				{"", "group:stick", ""}
-			}
-		})
+	if recipe then
+		core.register_craft({output = name:sub(2), recipe = recipe})
 	end
 end
 
@@ -61,47 +49,35 @@ function farming.hoe_on_use(itemstack, user, pointed_thing, uses)
 
 	local pt = pointed_thing or {}
 	local is_used = false
+	local under = ""
 
-	-- am I going to hoe the top of a dirt node?
+	-- am I pointing at the top of a dirt node
 	if pt.type == "node" and pt.above.y == pt.under.y + 1 then
 
-		local under = minetest.get_node(pt.under)
+		local pname = user:get_player_name() or ""
 		local upos = pointed_thing.under
+		under = core.get_node(upos)
+		local udef = core.registered_nodes[under.name] ; if not udef then return end
 
-		if minetest.is_protected(upos, user:get_player_name()) then
-			minetest.record_protection_violation(upos, user:get_player_name())
+		if core.is_protected(upos, pname) then
+			core.record_protection_violation(upos, pname) ; return
+		end
+
+		-- do we have space above and tillable dirt below
+		if core.get_node({x = upos.x, y = upos.y + 1, z = upos.z}).name ~= "air"
+		or udef.groups.soil ~= 1 then return end
+
+		-- mineclonia compatibility check before default soil check
+		if not mod_mcl and (not udef.soil or not udef.soil.wet or not udef.soil.dry) then
 			return
 		end
 
-		local p = {x = pt.under.x, y = pt.under.y + 1, z = pt.under.z}
-		local above = minetest.get_node(p)
+		local new_dirt = mod_mcl and "mcl_farming:soil" or udef.soil.dry
 
-		-- return if any of the nodes is not registered
-		if not minetest.registered_nodes[under.name]
-		or not minetest.registered_nodes[above.name] then return end
+		-- turn the node into soil, mark hoe for wear and play sound
+		core.set_node(pt.under, {name = new_dirt}) ; is_used = true
 
-		-- check if the node above the pointed thing is air
-		if above.name ~= "air" then return end
-
-		-- check if pointing at dirt
-		if minetest.get_item_group(under.name, "soil") ~= 1 then return end
-
-		-- check if (wet) soil defined
-		local ndef = minetest.registered_nodes[under.name]
-
-		if ndef.soil == nil or ndef.soil.wet == nil or ndef.soil.dry == nil then
-			return
-		end
-
-		if minetest.is_protected(pt.under, user:get_player_name()) then
-			minetest.record_protection_violation(pt.under, user:get_player_name())
-			return
-		end
-
-		-- turn the node into soil, wear out item and play sound
-		minetest.set_node(pt.under, {name = ndef.soil.dry}) ; is_used = true
-
-		minetest.sound_play("default_dig_crumbly", {pos = pt.under, gain = 0.5}, true)
+		core.sound_play("default_dig_crumbly", {pos = upos, gain = 0.5}, true)
 	end
 
 	local wdef = itemstack:get_definition()
@@ -113,8 +89,8 @@ function farming.hoe_on_use(itemstack, user, pointed_thing, uses)
 		local ent = pt.ref and pt.ref:get_luaentity()
 		local dir = user:get_look_dir()
 
-		if (ent and ent.name ~= "__builtin:item"
-		and ent.name ~= "__builtin:falling_node") or pt.ref:is_player() then
+		if (ent and ent.name ~= "__builtin:item" and ent.name ~= "__builtin:falling_node")
+		or pt.ref:is_player() then
 
 			pt.ref:punch(user, nil, {full_punch_interval = 1.0,
 					damage_groups = wdef.damage_groups}, dir)
@@ -123,10 +99,9 @@ function farming.hoe_on_use(itemstack, user, pointed_thing, uses)
 		end
 	end
 
-	-- only when used on soil top or external entity
-	if is_used then
+	if is_used then -- add wear when used
 
-		-- cretive doesnt wear tools but toolranks registers uses with wear so set to 1
+		-- creative doesnt wear tools but toolranks registers uses with wear so set to 1
 		if farming.is_creative(user:get_player_name()) then
 			if mod_tr then wear = 1 else wear = 0 end
 		end
@@ -138,7 +113,7 @@ function farming.hoe_on_use(itemstack, user, pointed_thing, uses)
 		end
 
 		if itemstack:get_count() == 0 and wdef.sound and wdef.sound.breaks then
-			minetest.sound_play(wdef.sound.breaks, {pos = pt.above, gain = 0.5}, true)
+			core.sound_play(wdef.sound.breaks, {pos = pt.above, gain = 0.5}, true)
 		end
 	end
 
@@ -154,7 +129,7 @@ farming.register_hoe(":farming:hoe_wood", {
 	material = "group:wood"
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "fuel",
 	recipe = "farming:hoe_wood",
 	burntime = 5
@@ -204,29 +179,23 @@ farming.register_hoe(":farming:hoe_diamond", {
 
 if mod_tr then
 
-	minetest.override_item("farming:hoe_wood", {
-		original_description = S("Wood Hoe"),
-		description = toolranks.create_description(S("Wood Hoe"))})
+	core.override_item("farming:hoe_wood", {original_description = S("Wood Hoe"),
+			description = toolranks.create_description(S("Wood Hoe"))})
 
-	minetest.override_item("farming:hoe_stone", {
-		original_description = S("Stone Hoe"),
-		description = toolranks.create_description(S("Stone Hoe"))})
+	core.override_item("farming:hoe_stone", {original_description = S("Stone Hoe"),
+			description = toolranks.create_description(S("Stone Hoe"))})
 
-	minetest.override_item("farming:hoe_steel", {
-		original_description = S("Steel Hoe"),
-		description = toolranks.create_description(S("Steel Hoe"))})
+	core.override_item("farming:hoe_steel", {original_description = S("Steel Hoe"),
+			description = toolranks.create_description(S("Steel Hoe"))})
 
-	minetest.override_item("farming:hoe_bronze", {
-		original_description = S("Bronze Hoe"),
-		description = toolranks.create_description(S("Bronze Hoe"))})
+	core.override_item("farming:hoe_bronze", {original_description = S("Bronze Hoe"),
+			description = toolranks.create_description(S("Bronze Hoe"))})
 
-	minetest.override_item("farming:hoe_mese", {
-		original_description = S("Mese Hoe"),
-		description = toolranks.create_description(S("Mese Hoe"))})
+	core.override_item("farming:hoe_mese", {original_description = S("Mese Hoe"),
+			description = toolranks.create_description(S("Mese Hoe"))})
 
-	minetest.override_item("farming:hoe_diamond", {
-		original_description = S("Diamond Hoe"),
-		description = toolranks.create_description(S("Diamond Hoe"))})
+	core.override_item("farming:hoe_diamond", {original_description = S("Diamond Hoe"),
+			description = toolranks.create_description(S("Diamond Hoe"))})
 end
 
 -- hoe bomb function
@@ -234,82 +203,59 @@ end
 local function hoe_area(pos, player)
 
 	-- check for protection
-	if minetest.is_protected(pos, player:get_player_name()) then
-		minetest.record_protection_violation(pos, player:get_player_name())
-		return
+	if core.is_protected(pos, player:get_player_name()) then
+		core.record_protection_violation(pos, player:get_player_name()) ; return
 	end
 
 	local r = 5 -- radius
 
 	-- remove flora (grass, flowers etc.)
-	local res = minetest.find_nodes_in_area(
+	local res = core.find_nodes_in_area(
 			{x = pos.x - r, y = pos.y - 1, z = pos.z - r},
-			{x = pos.x + r, y = pos.y + 2, z = pos.z + r}, {"group:flora"})
+			{x = pos.x + r, y = pos.y + 1, z = pos.z + r}, {"group:flora", "group:grass",
+					"group:dry_grass", "default:dry_shrub", "farming:weed"})
 
 	for n = 1, #res do
-		minetest.swap_node(res[n], {name = "air"})
+		core.remove_node(res[n])
 	end
 
 	-- replace dirt with tilled soil
-	res = minetest.find_nodes_in_area_under_air(
-		{x = pos.x - r, y = pos.y - 1, z = pos.z - r},
-		{x = pos.x + r, y = pos.y + 2, z = pos.z + r},
-		{"group:soil"})
+	res = core.find_nodes_in_area_under_air(
+			{x = pos.x - r, y = pos.y - 1, z = pos.z - r},
+			{x = pos.x + r, y = pos.y + 2, z = pos.z + r},
+			{"group:soil", "ethereal:dry_dirt"})
 
 	for n = 1, #res do
-		minetest.swap_node(res[n], {name = "farming:soil"})
+		core.swap_node(res[n], {name = "farming:soil"})
 	end
 end
 
 -- throwable hoe bomb entity
 
-minetest.register_entity("farming:hoebomb_entity", {
+core.register_entity("farming:hoebomb_entity", {
 
 	initial_properties = {
 		physical = true,
 		visual = "sprite",
 		visual_size = {x = 1.0, y = 1.0},
 		textures = {"farming_hoe_bomb.png"},
-		collisionbox = {-0.1,-0.1,-0.1,0.1,0.1,0.1}
+		collisionbox = {-0.2,-0.2,-0.2,0.2,0.2,0.2}
 	},
 
-	lastpos = {},
-	player = "",
-
-	on_step = function(self, dtime)
+	on_step = function(self, dtime, moveresult)
 
 		if not self.player then
+			self.object:remove() ; return
+		end
+
+		if moveresult.collides then
+
+			local pos = vector.round(self.object:get_pos())
+
+			pos.y = pos.y - 1 ; hoe_area(pos, self.player)
 
 			self.object:remove()
-
-			return
 		end
-
-		local pos = self.object:get_pos()
-
-		if self.lastpos.x ~= nil then
-
-			local vel = self.object:get_velocity()
-
-			-- only when potion hits something physical
-			if vel.x == 0 or vel.y == 0 or vel.z == 0 then
-
-				if self.player ~= "" then
-
-					-- round up coords to fix glitching through doors
-					self.lastpos = vector.round(self.lastpos)
-
-					hoe_area(self.lastpos, self.player)
-				end
-
-				self.object:remove()
-
-				return
-
-			end
-		end
-
-		self.lastpos = pos
 	end
 })
 
@@ -318,9 +264,8 @@ minetest.register_entity("farming:hoebomb_entity", {
 local function throw_potion(itemstack, player)
 
 	local pos = player:get_pos()
-
-	local obj = minetest.add_entity({
-			x = pos.x, y = pos.y + 1.5, z = pos.z}, "farming:hoebomb_entity")
+	local obj = core.add_entity(
+			{x = pos.x, y = pos.y + 1.5, z = pos.z}, "farming:hoebomb_entity")
 
 	if not obj then return end
 
@@ -336,7 +281,7 @@ end
 
 -- hoe bomb item
 
-minetest.register_craftitem("farming:hoe_bomb", {
+core.register_craftitem("farming:hoe_bomb", {
 	description = S("Hoe Bomb (use or throw on grassy areas to hoe land)"),
 	inventory_image = "farming_hoe_bomb.png",
 	groups = {flammable = 2, not_in_creative_inventory = 1},
@@ -344,18 +289,18 @@ minetest.register_craftitem("farming:hoe_bomb", {
 	on_use = function(itemstack, user, pointed_thing)
 
 		if pointed_thing.type == "node" then
-			hoe_area(pointed_thing.above, user)
+			hoe_area(pointed_thing.under, user)
 		else
 			throw_potion(itemstack, user)
-
-			if not farming.is_creative(user:get_player_name()) then
-
-				itemstack:take_item()
-
-				return itemstack
-			end
 		end
-	end,
+
+		if not farming.is_creative(user:get_player_name()) then
+
+			itemstack:take_item()
+
+			return itemstack
+		end
+	end
 })
 
 -- helper function
@@ -374,39 +319,43 @@ local function node_not_num(nodename)
 	return str
 end
 
-farming.scythe_not_drops = {"farming:trellis", "farming:beanpole"}
+farming.scythe_not_drops = {
+	["farming:trellis"] = 1,
+	["farming:beanpole"] = 1
+}
 
-farming.add_to_scythe_not_drops = function(item)
-	table.insert(farming.scythe_not_drops, item)
+function farming.add_to_scythe_not_drops(item)
+	farming.scythe_not_drops[item] = 1
 end
 
 -- Mithril Scythe (special item)
 
-minetest.register_tool("farming:scythe_mithril", {
+core.register_tool("farming:scythe_mithril", {
 	description = S("Mithril Scythe (Use to harvest and replant crops)"),
 	inventory_image = "farming_scythe_mithril.png",
 	sound = {breaks = "default_tool_breaks"},
 
 	on_use = function(itemstack, placer, pointed_thing)
 
+		-- if punching entity/object
+		if pointed_thing.type == "object" then
+			pointed_thing.ref:punch(placer, 1, {full_punch_interval = 1.0})
+			return itemstack
+		end
+
 		if pointed_thing.type ~= "node" then return end
 
 		local pos = pointed_thing.under
 		local name = placer:get_player_name()
 
-		if minetest.is_protected(pos, name) then return end
+		if core.is_protected(pos, name) then return end
 
-		local node = minetest.get_node_or_nil(pos)
+		local node = core.get_node(pos)
+		local def = core.registered_nodes[node.name]
 
-		if not node then return end
+		if not def or not def.drop or not def.groups.plant then return end
 
-		local def = minetest.registered_nodes[node.name]
-
-		if not def or not def.drop or not def.groups or not def.groups.plant then
-			return
-		end
-
-		local drops = minetest.get_node_drops(node.name, "")
+		local drops = core.get_node_drops(node.name, "")
 
 		if not drops or #drops == 0 or (#drops == 1 and drops[1] == "") then
 			return
@@ -414,24 +363,14 @@ minetest.register_tool("farming:scythe_mithril", {
 
 		-- get crop name
 		local mname = node.name:split(":")[1]
-		local pname = node_not_num(node.name:split(":")[2])
+		local pname = node_not_num(node.name:split(":")[2]) ; if not pname then return end
 
-		if not pname then return end
-
-		-- add dropped items
+		-- add dropped items apart from those on table above
 		for _, dropped_item in pairs(drops) do
 
-			-- dont drop items on this list
-			for _, not_item in pairs(farming.scythe_not_drops) do
+			if dropped_item and not farming.scythe_not_drops[dropped_item] then
 
-				if dropped_item == not_item then
-					dropped_item = nil
-				end
-			end
-
-			if dropped_item then
-
-				local obj = minetest.add_item(pos, dropped_item)
+				local obj = core.add_item(pos, dropped_item)
 
 				if obj then
 
@@ -447,18 +386,18 @@ minetest.register_tool("farming:scythe_mithril", {
 		end
 
 		-- play sound
-		minetest.sound_play("default_grass_footstep", {pos = pos, gain = 1.0}, true)
+		core.sound_play("default_grass_footstep", {pos = pos}, true)
 
 		-- replace with seed or crop_1
 		local replace = mname .. ":" .. pname .. "1"
 
-		if minetest.registered_nodes[replace] then
+		if core.registered_nodes[replace] then
 
-			local p2 = minetest.registered_nodes[replace].place_param2 or 1
+			local p2 = core.registered_nodes[replace].place_param2 or 1
 
-			minetest.set_node(pos, {name = replace, param2 = p2})
+			core.set_node(pos, {name = replace, param2 = p2})
 		else
-			minetest.set_node(pos, {name = "air"})
+			core.remove_node(pos)
 		end
 
 		if not farming.is_creative(name) then
@@ -472,9 +411,9 @@ minetest.register_tool("farming:scythe_mithril", {
 
 -- if moreores found add mithril scythe recipe
 
-if minetest.get_modpath("moreores") then
+if core.get_modpath("moreores") then
 
-	minetest.register_craft({
+	core.register_craft({
 		output = "farming:scythe_mithril",
 		recipe = {
 			{"", "moreores:mithril_ingot", "moreores:mithril_ingot"},

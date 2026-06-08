@@ -1,4 +1,4 @@
-if not minetest.get_modpath("loot") then
+if not core.get_modpath("loot") then
 	return
 end
 

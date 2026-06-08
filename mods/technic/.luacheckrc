@@ -5,8 +5,9 @@ max_line_length = 150
 redefined = false
 
 globals = {
-    "technic", "minetest",
-    "srcstack",
+    "technic",
+    "core",
+    "minetest",
 }
 
 read_globals = {
@@ -30,7 +31,7 @@ read_globals = {
 
     "protector", "isprotect",
     "homedecor_expect_infinite_stacks",
-    
+
     "craftguide", "i3"
 }
 

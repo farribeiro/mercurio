@@ -1,6 +1,6 @@
 local pigdef = {
 	type = "monster",
-	passive = true,
+--	passive = true,
 	reach = 3,
 	damage = 2,
 	attack_type = "dogfight",
@@ -14,7 +14,6 @@ local pigdef = {
 	textures = {
 		{"dmobs_flying_pig_mean.png"}
 	},
-	jump = true,
 	fly = true,
 	fall_speed = 0,
 	stepheight = 1.5,
@@ -55,15 +54,6 @@ local pigdef = {
 			self.fly = false
 			self.fall_speed = -4
 		end
-	end,
-
-	on_rightclick = function(self, clicker)
-
-		if mobs:feed_tame(self, clicker, 8, true, true) then
-			return
-		end
-
-		mobs:capture_mob(self, clicker, 0, 5, 50, false, nil)
 	end
 }
 

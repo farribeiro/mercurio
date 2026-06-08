@@ -10,8 +10,10 @@ mobs:register_mob("dmobs:whale", {
 	collisionbox = {-0.9, -1.2, -0.9, 0.9, 0.9, 0.9},
 	visual = "mesh",
 	mesh = "whale.b3d",
+	rotate = 180,
 	textures = {
-		{"dmobs_whale.png"}
+		{"dmobs_whale.png"},
+		{"dmobs_whale.png^[brighten"}
 	},
 	blood_texture = "mobs_blood.png",
 	visual_size = {x = 2.5, y = 2.5},
@@ -34,8 +36,8 @@ mobs:register_mob("dmobs:whale", {
 		{name = "mobs:meat_raw", chance = 1, min = 1, max = 1}
 	},
 	sounds = {
-		random = "whale_1",
-		death = "whale_1",
+		random = "whale",
+		death = "whale-death",
 		distance = 128
 	},
 	animation = {
@@ -51,11 +53,9 @@ mobs:register_mob("dmobs:whale", {
 
 	on_rightclick = function(self, clicker)
 
-		if mobs:feed_tame(self, clicker, 8, true, true) then
-			return
-		end
-
-		mobs:capture_mob(self, clicker, 0, 5, 50, false, nil)
+		if mobs:protect(self, clicker) then return end
+		if mobs:feed_tame(self, clicker, 8, true, true) then return end
+		if mobs:capture_mob(self, clicker, 0, 5, 50, false, nil) then return end
 	end
 })
 

@@ -3,7 +3,7 @@ mobs:register_mob("dmobs:gnorm", {
 	can_dig = true,
 	passive = true,
 	reach = 1,
-	damage = 1,
+	damage = 1, attack_chance = 99,
 	attack_type = "dogfight",
 	hp_min = 32,
 	hp_max = 42,
@@ -55,11 +55,9 @@ mobs:register_mob("dmobs:gnorm", {
 
 	on_rightclick = function(self, clicker)
 
-		if mobs:feed_tame(self, clicker, 8, true, true) then
-			return
-		end
-
-		mobs:capture_mob(self, clicker, 0, 5, 50, false, nil)
+		if mobs:protect(self, clicker) then return end
+		if mobs:feed_tame(self, clicker, 8, true, true) then return end
+		if mobs:capture_mob(self, clicker, 0, 5, 50, false, nil) then return end
 	end
 })
 

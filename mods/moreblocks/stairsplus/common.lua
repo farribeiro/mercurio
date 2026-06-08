@@ -47,26 +47,29 @@ stairsplus.rotate_node_aux = function(itemstack, placer, pointed_thing)
 	local item_prefix = name_to_category(itemstack:get_name())
 	-- category for what we are placing against
 	local under = pointed_thing.under
-	local under_node = minetest.get_node(under)
+	local under_node = core.get_node(under)
 	local under_prefix = under_node and name_to_category(under_node.name)
 
 	local same_cat = item_prefix == under_prefix
 
 	-- standard (floor) facedir, also used for sneak placement against the lower half of the wall
-	local p2 = placer and minetest.dir_to_facedir(placer:get_look_dir()) or 0
+	local p2 = placer and core.dir_to_facedir(placer:get_look_dir()) or 0
 
 	-- check which face and which quadrant we are interested in
 	-- this is used both to check if we're handling parallel placement in the same-category case,
 	-- and in general for sneak placement
-	local face_pos = minetest.pointed_thing_to_face_pos(placer, pointed_thing)
+	local face_pos = core.pointed_thing_to_face_pos(placer, pointed_thing)
 	local face_off = vector.subtract(face_pos, under)
 
 	-- we cannot trust face_off to tell us the correct directionif the
 	-- under node has a non-standard shape, so use the distance between under and above
-	local wallmounted = minetest.dir_to_wallmounted(vector.subtract(pointed_thing.above, under))
+	local wallmounted = core.dir_to_wallmounted(vector.subtract(pointed_thing.above, under))
 
 	if same_cat and not aux then
-		p2 = under_node.param2
+		-- param2 can be in the range [0, 31]. We assume that the stair nodes use the
+		-- drawtype "facedir". Wrap the value like done in Luanti `src/mapnode.cpp`.
+		p2 = under_node.param2 % 24
+
 		-- flip if placing above or below an upright or upside-down node
 		-- TODO should we also flip when placing next to a side-mounted node?
 		if wallmounted < 2 then
@@ -115,12 +118,12 @@ stairsplus.rotate_node_aux = function(itemstack, placer, pointed_thing)
 		end
 	end
 
-	return minetest.item_place(itemstack, placer, pointed_thing, p2)
+	return core.item_place(itemstack, placer, pointed_thing, p2)
 end
 
 stairsplus.register_single = function(category, alternate, info, modname, subname, recipeitem, fields)
 
-	local src_def = minetest.registered_nodes[recipeitem] or {}
+	local src_def = core.registered_nodes[recipeitem] or {}
 	local desc_base = S("@1 "..descriptions[category], fields.description)
 	local def = {}
 
@@ -133,6 +136,7 @@ stairsplus.register_single = function(category, alternate, info, modname, subnam
 		def[k] = v
 	end
 
+	def.is_ground_content = def.is_ground_content == true
 	def.drawtype = "nodebox"
 	def.paramtype = "light"
 	def.paramtype2 = def.paramtype2 or "facedir"
@@ -143,27 +147,34 @@ stairsplus.register_single = function(category, alternate, info, modname, subnam
 	-- This makes node rotation work on placement
 	def.place_param2 = nil
 
+	-- This strips palettes from respective nodes to prevent warnings
+	def.palette = nil
+
 	-- Darken light sources slightly to make up for their smaller visual size
 	def.light_source = math.max(0, (def.light_source or 0) - 1)
-
-	def.on_place = stairsplus.rotate_node_aux
 	def.groups = stairsplus:prepare_groups(fields.groups)
 
 	if category == "slab" then
-		if type(info) ~= "table" then
-			def.node_box = {
-				type = "fixed",
-				fixed = {-0.5, -0.5, -0.5, 0.5, (info/16)-0.5, 0.5},
-			}
-			def.description = ("%s (%d/16)"):format(desc_base, info)
+		if core.global_exists("place_rotated") then
+			def.on_place = place_rotated.slab
 		else
+			def.on_place = stairsplus.rotate_node_aux
+		end
+		if info._circular_saw_cost then
+			def._circular_saw_cost = info._circular_saw_cost
+		end
+		if info.size then
 			def.node_box = {
 				type = "fixed",
-				fixed = info,
+				fixed = {-0.5, -0.5, -0.5, 0.5, (info.size/16)-0.5, 0.5},
 			}
+			def.description = ("%s (%d/16)"):format(desc_base, info.size)
+		else
+			def.node_box = info.node_box
 			def.description = desc_base .. alternate:gsub("_", " "):gsub("(%a)(%S*)", function(a, b) return a:upper() .. b end)
 		end
 	else
+		def.on_place = stairsplus.rotate_node_aux
 		def.description = desc_base
 		if category == "slope" then
 			def.drawtype = "mesh"
@@ -172,10 +183,10 @@ stairsplus.register_single = function(category, alternate, info, modname, subnam
 		end
 	end
 
-	if fields.drop and not (type(fields.drop) == "table") then
+	if fields.drop and (type(fields.drop) ~= "table") then
 		def.drop = modname.. ":" .. category .. "_" .. fields.drop .. alternate
 	end
 
-	minetest.register_node(":" ..modname.. ":" .. category .. "_" .. subname .. alternate, def)
+	core.register_node(":" ..modname.. ":" .. category .. "_" .. subname .. alternate, def)
 	stairsplus.register_recipes(category, alternate, modname, subname, recipeitem)
 end

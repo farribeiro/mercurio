@@ -40,7 +40,7 @@ stairs.register_all("etherium_crystal_glass", "etherium_stuff:crystal_glass",
 
 
 -- Stairs Plus (in More Blocks)
-elseif minetest.global_exists("stairsplus") then
+elseif core.global_exists("stairsplus") then
 
 stairsplus:register_all("etherium_stuff", "sandstone", "etherium_stuff:sandstone", {
 	description = S("Etherium Sandstone"),
@@ -127,7 +127,7 @@ end
 local etherium_stairs = {"stairs:slab_etherium_sandstone", "stairs:slab_etherium_sandstone_brick", "stairs:slab_etherium_sandstone_block", "stairs:slab_etherium_glass", "stairs:slab_etherium_crystal_glass", "stairs:stair_etherium_sandstone", "stairs:stair_etherium_sandstone_brick", "stairs:stair_etherium_sandstone_block", "stairs:stair_etherium_glass", "stairs:stair_etherium_crystal_glass", "stairs:stair_inner_etherium_sandstone", "stairs:stair_inner_etherium_sandstone_brick", "stairs:stair_inner_etherium_sandstone_block", "stairs:stair_inner_etherium_glass", "stairs:stair_inner_etherium_crystal_glass", "stairs:stair_outer_etherium_sandstone", "stairs:stair_outer_etherium_sandstone_brick", "stairs:stair_outer_etherium_sandstone_block", "stairs:stair_outer_etherium_glass", "stairs:stair_outer_etherium_crystal_glass"}
 
 for _,stair in ipairs(etherium_stairs) do
-    if minetest.registered_nodes[stair] ~= nil then
-	    minetest.override_item(stair, {on_secondary_use = place_in_air})
+    if core.registered_nodes[stair] ~= nil then
+	    core.override_item(stair, {on_secondary_use = place_in_air})
 	end
 end

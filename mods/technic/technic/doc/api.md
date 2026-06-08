@@ -80,10 +80,39 @@ Available functions:
 		* `technic.producer = "PR"`: Provides energy
 		* `technic.battery = "BA"`: Energy storage
 	* See also `Machine types`
+* `technic.handle_machine_upgrades(meta)`
+	* Retrieves the count of `upgrade1` and `upgrade2` items.
+	* Use the returned values to improve the capabilities of a machine.
+	  As a rule of thumb, each upgrade should result in a 10% improvement.
+	* Return values:
+		* `EU_upgrade`: integer, to improve power consumption or capacity
+		* `tube_upgrade`: integer, to speed up pipeworks item actions
 
-Callbacks for pipeworks item transfer:
+### Inventory actions and lists
 
+If a node is registered as a technic machine, the following node inventory
+lists have a defined purpose because stack movement functions depend on them.
+
+* `src`: input slot of any size
+* `dst`: output slot of any size
+* `upgrade1`: optional, 1x1 slot for machine upgrades
+* `upgrade2`: optional, same as `upgrade1`.
+
+These functions protect access to the aforementioned inventory lists:
+
+* `technic.machine_inventory_put(...)`
+	* Helper for `<nodedef>.allow_metadata_inventory_put`
+* `technic.machine_inventory_take(...)`
+	* Helper for `<nodedef>.allow_metadata_inventory_take`
+* `technic.machine_inventory_move(...)`
+	* Helper for `<nodedef>.allow_metadata_inventory_move`
+
+### pipeworks helper functions
+
+* `technic.default_can_insert(pos, node, stack, direction)`
+	* Returns boolean, whether the stack fits.
 * `technic.can_insert_unique_stack(pos, node, stack, direction)`
+	* Is based on `technic.default_can_insert`
 * `technic.insert_object_unique_stack(pos, node, stack, direction)`
 	* Functions for the parameters `can_insert` and `insert_object` to avoid
 	  filling multiple inventory slots with same type of item.
@@ -166,7 +195,7 @@ Unsorted functions:
 * `technic.set_charge(itemstack, charge)`
 	* Modifies the charge of the given itemstack.
 
-### Node-specific
+### Node manipulation
 * `technic.get_or_load_node(pos)`
 	* If the mapblock is loaded, it returns the node at pos,
 	  else it loads the chunk and returns `nil`.
@@ -192,7 +221,7 @@ Groups:
 * `technic_machine = 1`
 	* UNRELIABLE. Indicates whether the item or node belongs to technic
 * `connect_sides = {"top", "left", ...}`
-	* Extends the Minetest API. Indicates where the machine can be connected.
+	* Extends the Luanti API. Indicates where the machine can be connected.
 
 Additional definition fields:
 
@@ -239,6 +268,20 @@ data:
 `<tier>` corresponds to the tier name registered using
 `technic.register_tier` (ex. `LV`). It is possible for the machine to depend on
 multiple tiers (or networks).
+
+Furthermore, the following fields are reserved for machines:
+
+* `public`: integer, optional.
+	* Controls the behaviour of the `technic.machine_inventory_*` helper functions.
+	* `0` (default): Inventory lists are protected according to `core.is_protected`.
+	* `1`: Inventory lists are accessible to everyone.
+	  Except for: `upgrade1`, `upgrade2`.
+* `splitstacks`: integer, optional.
+    * Defines the behaviour of technic-specific insertion functions, commonly used
+      for pipeworks compatibility.
+    * `0` (default): entire stacks will be inserted.
+    * `1`: Insert one item (i.e. stack size 1) at a time.
+* `tube_time`: internal counter for outgoing tube items.
 
 
 ## Manual: Network basics

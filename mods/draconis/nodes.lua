@@ -2,6 +2,8 @@
 -- Nodes --
 -----------
 
+local S = draconis.S
+
 local random = math.random
 
 -- Sounds --
@@ -48,7 +50,7 @@ end
 -- Logs --
 
 register_node("draconis:log_scorched", {
-	description = "Scorched Log",
+	description = S("Scorched Log"),
 	tiles = {"draconis_log_scorched_top.png", "draconis_log_scorched_top.png", "draconis_log_scorched.png"},
 	paramtype2 = "facedir",
 	is_ground_content = false,
@@ -58,7 +60,7 @@ register_node("draconis:log_scorched", {
 }, true)
 
 register_node("draconis:log_frozen", {
-	description = "Frozen Log",
+	description = S("Frozen Log"),
 	tiles = {"draconis_log_frozen_top.png", "draconis_log_frozen_top.png", "draconis_log_frozen.png"},
 	paramtype2 = "facedir",
 	is_ground_content = false,
@@ -70,7 +72,7 @@ register_node("draconis:log_frozen", {
 -- Stone --
 
 register_node("draconis:stone_scorched", {
-	description = "Scorched Stone",
+	description = S("Scorched Stone"),
 	tiles = {"draconis_stone_scorched.png"},
 	paramtype2 = "facedir",
 	place_param2 = 0,
@@ -80,7 +82,7 @@ register_node("draconis:stone_scorched", {
 }, true)
 
 register_node("draconis:stone_frozen", {
-	description = "Frozen Stone",
+	description = S("Frozen Stone"),
 	tiles = {"draconis_stone_frozen.png"},
 	paramtype2 = "facedir",
 	place_param2 = 0,
@@ -92,14 +94,14 @@ register_node("draconis:stone_frozen", {
 -- Soil --
 
 register_node("draconis:soil_scorched", {
-	description = "Scorched Soil",
+	description = S("Scorched Soil"),
 	tiles = {"draconis_soil_scorched.png"},
 	groups = {crumbly = 3, soil = 1},
 	sounds = draconis.sounds.dirt
 })
 
 register_node("draconis:soil_frozen", {
-	description = "Frozen Soil",
+	description = S("Frozen Soil"),
 	tiles = {"draconis_soil_frozen.png"},
 	groups = {crumbly = 3, soil = 1},
 	sounds = draconis.sounds.dirt
@@ -108,7 +110,7 @@ register_node("draconis:soil_frozen", {
 -- Wood Planks
 
 register_node("draconis:wood_planks_scorched", {
-	description = "Scorched Wood Planks",
+	description = S("Scorched Wood Planks"),
 	tiles = {"draconis_wood_planks_scorched.png"},
 	is_ground_content = false,
 	groups = {tree = 1, choppy = 2, oddly_breakable_by_hand = 1, flammable = 2},
@@ -116,7 +118,7 @@ register_node("draconis:wood_planks_scorched", {
 }, true)
 
 register_node("draconis:wood_planks_frozen", {
-	description = "Frozen Wood Planks",
+	description = S("Frozen Wood Planks"),
 	tiles = {"draconis_wood_planks_frozen.png"},
 	is_ground_content = false,
 	groups = {tree = 1, choppy = 2, oddly_breakable_by_hand = 1, flammable = 2},
@@ -126,7 +128,7 @@ register_node("draconis:wood_planks_frozen", {
 -- Stone Bricks --
 
 register_node("draconis:dragonstone_bricks_fire", {
-	description = "Fire Dragonstone Bricks",
+	description = S("Fire Dragonstone Bricks"),
 	tiles = {"draconis_dragonstone_bricks_fire.png"},
 	paramtype2 = "facedir",
 	place_param2 = 0,
@@ -136,7 +138,7 @@ register_node("draconis:dragonstone_bricks_fire", {
 }, true)
 
 register_node("draconis:dragonstone_block_fire", {
-	description = "Fire Dragonstone Block",
+	description = S("Fire Dragonstone Block"),
 	tiles = {"draconis_dragonstone_block_fire.png"},
 	paramtype2 = "facedir",
 	place_param2 = 0,
@@ -146,7 +148,7 @@ register_node("draconis:dragonstone_block_fire", {
 }, true)
 
 register_node("draconis:dragonstone_bricks_ice", {
-	description = "Ice Dragonstone Bricks",
+	description = S("Ice Dragonstone Bricks"),
 	tiles = {"draconis_dragonstone_bricks_ice.png"},
 	paramtype2 = "facedir",
 	place_param2 = 0,
@@ -156,7 +158,7 @@ register_node("draconis:dragonstone_bricks_ice", {
 }, true)
 
 register_node("draconis:dragonstone_block_ice", {
-	description = "Ice Dragonstone Block",
+	description = S("Ice Dragonstone Block"),
 	tiles = {"draconis_dragonstone_block_ice.png"},
 	paramtype2 = "facedir",
 	place_param2 = 0,
@@ -166,7 +168,7 @@ register_node("draconis:dragonstone_block_ice", {
 }, true)
 
 register_node("draconis:stone_bricks_scorched", {
-	description = "Scorched Stone Brick",
+	description = S("Scorched Stone Brick"),
 	tiles = {"draconis_stone_brick_scorched.png"},
 	paramtype2 = "facedir",
 	place_param2 = 0,
@@ -176,7 +178,7 @@ register_node("draconis:stone_bricks_scorched", {
 }, true)
 
 register_node("draconis:stone_bricks_frozen", {
-	description = "Frozen Stone Brick",
+	description = S("Frozen Stone Brick"),
 	tiles = {"draconis_stone_brick_frozen.png"},
 	paramtype2 = "facedir",
 	place_param2 = 0,
@@ -191,7 +193,7 @@ register_node("draconis:stone_bricks_frozen", {
 
 for color in pairs(draconis.colors_fire) do
 	register_node("draconis:dragonhide_block_fire_" .. color, {
-		description = "Fire Dragonhide Block \n" .. infotext(color, true),
+		description = S("Fire Dragonhide Block") .. "\n" .. infotext(S(color), true),
 		tiles = {
 			"draconis_dragonhide_block_" .. color .. "_top.png",
 			"draconis_dragonhide_block_" .. color .. "_top.png",
@@ -207,7 +209,7 @@ end
 
 for color in pairs(draconis.colors_ice) do
 	register_node("draconis:dragonhide_block_ice_" .. color, {
-		description = "Ice Dragonhide Block \n" .. infotext(color, true),
+		description = S("Ice Dragonhide Block") .. "\n" .. infotext(S(color), true),
 		tiles = {
 			"draconis_dragonhide_block_" .. color .. "_top.png",
 			"draconis_dragonhide_block_" .. color .. "_top.png",
@@ -224,7 +226,7 @@ end
 -- Bone Pile --
 
 register_node("draconis:bone_pile_scorched", {
-	description = "Scorched Bone Pile",
+	description = S("Scorched Bone Pile"),
 	tiles = {
 		"draconis_bone_pile_scorched.png",
 	},
@@ -236,7 +238,7 @@ register_node("draconis:bone_pile_scorched", {
 })
 
 register_node("draconis:bone_pile_frozen", {
-	description = "Frozen Bone Pile",
+	description = S("Frozen Bone Pile"),
 	tiles = {
 		"draconis_bone_pile_frozen.png",
 	},
@@ -645,7 +647,7 @@ local function cool_crucible(pos, ingot)
 end
 
 minetest.register_node("draconis:draconic_forge_fire", {
-	description = "Fire Draconic Steel Forge",
+	description = S("Fire Draconic Steel Forge"),
 	tiles = {
 		"draconis_dragonstone_block_fire.png",
 		"draconis_dragonstone_block_fire.png",
@@ -676,7 +678,7 @@ minetest.register_node("draconis:draconic_forge_fire", {
 	on_dig = function(pos, node, player)
 		local structure = get_forge_structure(pos)
 		if minetest.node_dig(pos, node, player) then
-			if player:get_player_control().sneak
+			if player and player:get_player_control().sneak
 			and structure then
 				local inv = player:get_inventory()
 				local bricks = ItemStack(forge_shell[node.name] .. " " .. #shell_v)
@@ -868,7 +870,7 @@ minetest.register_node("draconis:draconic_forge_fire", {
 })
 
 minetest.register_node("draconis:draconic_forge_ice", {
-	description = "Ice Draconic Steel Forge",
+	description = S("Ice Draconic Steel Forge"),
 	tiles = {
 		"draconis_dragonstone_block_ice.png",
 		"draconis_dragonstone_block_ice.png",
@@ -898,7 +900,7 @@ minetest.register_node("draconis:draconic_forge_ice", {
 	on_dig = function(pos, node, player)
 		local structure = get_forge_structure(pos)
 		if minetest.node_dig(pos, node, player) then
-			if player:get_player_control().sneak
+			if player and player:get_player_control().sneak
 			and structure then
 				local inv = player:get_inventory()
 				local bricks = ItemStack(forge_shell[node.name] .. " " .. #shell_v)
@@ -1038,9 +1040,11 @@ minetest.register_node("draconis:draconic_forge_ice", {
 -- Stairs --
 ------------
 
-local register_stairs = minetest.settings:get_bool("register_stairs")
+local register_stairs = minetest.settings:get_bool("register_stairs", true)
 
 if minetest.get_modpath("stairs")
+and stairs
+and stairs.register_stair_and_slab
 and register_stairs then
 	for i = 1, #stair_queue do
 		local name = stair_queue[i]

@@ -1,9 +1,10 @@
 
-local S = minetest.get_translator("mobs_animal")
+local S = core.get_translator("mobs_animal")
 
 -- Panda by AspireMint (CC BY-SA 3.0)
 
 mobs:register_mob("mobs_animal:panda", {
+	description = S("Panda"),
 	stepheight = 0.6,
 	type = "animal",
 	passive = false,
@@ -12,7 +13,7 @@ mobs:register_mob("mobs_animal:panda", {
 	owner_loyal = true,
 	attack_npcs = false,
 	reach = 2,
-	damage = 3,
+	damage = 3, attack_chance = 90,
 	hp_min = 10,
 	hp_max = 24,
 	armor = 100,
@@ -28,9 +29,8 @@ mobs:register_mob("mobs_animal:panda", {
 	walk_chance = 5,
 	walk_velocity = 0.5,
 	run_velocity = 1.5,
-	jump = false,
-	jump_height = 6,
-	follow = {"ethereal:bamboo", "bamboo:trunk"},
+	jump_height = 3,
+	follow = {"ethereal:bamboo", "bamboo:trunk", "group:bamboo"},
 	view_range = 8,
 	drops = {
 		{name = "mobs:meat_raw", chance = 1, min = 1, max = 2}
@@ -46,7 +46,7 @@ mobs:register_mob("mobs_animal:panda", {
 		stand2_start = 1, stand2_end = 1, -- covers eyes
 		stand3_start = 2, stand3_end = 2, -- surprised
 		walk_start = 10, walk_end = 70,
-		run_start = 10, run_end = 70,
+		run_start = 10, run_end = 70, run_speed = 60,
 		punch_start = 80, punch_end = 120
 	},
 
@@ -58,14 +58,21 @@ mobs:register_mob("mobs_animal:panda", {
 	end
 })
 
--- where to spawn (ethereal bamboo biome only)
+-- where to spawn
 
-if minetest.get_modpath("ethereal") and not mobs.custom_spawn_animal then
+if not mobs.custom_spawn_animal then
+
+	local spawn_on = "default:dirt_with_rainforest_litter"
+
+	if core.get_modpath("ethereal") then
+		spawn_on = "ethereal:bamboo_dirt"
+	elseif core.get_modpath("everness") then
+		spawn_on = "everness:dirt_with_grass_1"
+	end
 
 	mobs:spawn({
 		name = "mobs_animal:panda",
-		nodes = {"ethereal:bamboo_dirt"},
-		neighbors = {"group:grass"},
+		nodes = {spawn_on},
 		min_light = 14,
 		interval = 60,
 		chance = 8000,

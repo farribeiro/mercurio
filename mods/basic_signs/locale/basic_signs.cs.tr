@@ -1,0 +1,14 @@
+# textdomain: basic_signs
+Locked Sign=Zamčená cedule
+Glass Sign=Skleněná cedule
+Obsidian Glass Sign=Cedule z obsidiánového skla
+Plastic Sign=Plastová cedule
+green=zelená
+yellow=žlutá
+red=červená
+white_red=červenobílá
+white_black=bíločerná
+orange=oranžová
+blue=modrá
+brown=hnědá
+Sign (@1, steel)=Cedule (@1, ocelová)

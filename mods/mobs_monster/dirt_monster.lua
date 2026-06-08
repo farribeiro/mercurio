@@ -1,5 +1,5 @@
 
-local S = minetest.get_translator("mobs_monster")
+local S = core.get_translator("mobs_monster")
 
 -- custom dirt monster type
 
@@ -8,7 +8,8 @@ local dirt_types = {
 	{	nodes = {"ethereal:dry_dirt"},
 		skins = {"mobs_dirt_monster3.png"},
 		drops = {
-			{name = "ethereal:dry_dirt", chance = 1, min = 0, max = 2}
+			{name = "ethereal:dry_dirt", chance = 1, min = 0, max = 2},
+			{name = "ethereal:charcoal_lump", chance = 2, min = 0, max = 1}
 		}
 	}
 }
@@ -16,6 +17,7 @@ local dirt_types = {
 -- Dirt Monster by PilzAdam
 
 mobs:register_mob("mobs_monster:dirt_monster", {
+	description = S("Dirt Monster"),
 	type = "monster",
 	passive = false,
 	attack_type = "dogfight",
@@ -25,7 +27,7 @@ mobs:register_mob("mobs_monster:dirt_monster", {
 	hp_min = 3,
 	hp_max = 27,
 	armor = 100,
-	collisionbox = {-0.4, -1, -0.4, 0.4, 0.8, 0.4},
+	collisionbox = {-0.3, -1, -0.3, 0.3, 0.7, 0.3},
 	visual = "mesh",
 	mesh = "mobs_stone_monster.b3d",
 	textures = {
@@ -38,9 +40,9 @@ mobs:register_mob("mobs_monster:dirt_monster", {
 	view_range = 15,
 	walk_velocity = 1,
 	run_velocity = 3,
-	jump = true,
 	drops = {
-		{name = "default:dirt", chance = 1, min = 0, max = 2}
+		{name = "default:dirt", chance = 1, min = 0, max = 2},
+		{name = "default:clay_lump", chance = 2, min = 0, max = 1}
 	},
 	water_damage = 1,
 	lava_damage = 5,
@@ -50,7 +52,7 @@ mobs:register_mob("mobs_monster:dirt_monster", {
 		speed_normal = 15, speed_run = 15,
 		stand_start = 0, stand_end = 14,
 		walk_start = 15, walk_end = 38,
-		run_start = 40, run_end = 63,
+		run_start = 40, run_end = 63, run_speed = 45,
 		punch_start = 40, punch_end = 63
 	},
 
@@ -64,14 +66,14 @@ mobs:register_mob("mobs_monster:dirt_monster", {
 
 			tmp = dirt_types[n]
 
-			if minetest.find_node_near(pos, 1, tmp.nodes) then
+			if core.find_node_near(pos, 1, tmp.nodes) then
 
 				self.base_texture = tmp.skins
 				self.object:set_properties({textures = tmp.skins})
 
 				if tmp.drops then self.drops = tmp.drops end
 
-				return true
+				break
 			end
 		end
 

@@ -1,9 +1,10 @@
 
-local S = minetest.get_translator("mobs_animal")
+local S = core.get_translator("mobs_animal")
 
 -- Warthog originally by KrupnoPavel, B3D model by sirrobzeroone
 
 mobs:register_mob("mobs_animal:pumba", {
+	description = S("Warthog"),
 	stepheight = 0.6,
 	type = "animal",
 	passive = false,
@@ -12,7 +13,7 @@ mobs:register_mob("mobs_animal:pumba", {
 	owner_loyal = true,
 	attack_npcs = false,
 	reach = 2,
-	damage = 2,
+	damage = 2, attack_chance = 95,
 	hp_min = 10,
 	hp_max = 15,
 	armor = 100,
@@ -27,7 +28,6 @@ mobs:register_mob("mobs_animal:pumba", {
 	},
 	walk_velocity = 2,
 	run_velocity = 3,
-	jump = true,
 	jump_height = 6,
 	pushable = true,
 	follow = {"default:apple", "farming:potato"},
@@ -43,6 +43,7 @@ mobs:register_mob("mobs_animal:pumba", {
 		speed_normal = 15,
 		stand_start = 25, stand_end = 55,
 		walk_start = 70, walk_end = 100,
+		run_start = 70, run_end = 100, run_speed = 40,
 		punch_start = 70, punch_end = 100,
 		-- no specific dying animation, so use 2 frames at 1fps and rotate
 		die_start = 1, die_end = 2, die_speed = 1,
@@ -64,7 +65,7 @@ if not mobs.custom_spawn_animal then
 	local spawn_on = {"default:dirt_with_grass", "default:dry_dirt_with_dry_grass"}
 	local spawn_by = {"group:grass"}
 
-	if minetest.get_modpath("ethereal") then
+	if core.get_modpath("ethereal") then
 		spawn_on = {"ethereal:mushroom_dirt"}
 		spawn_by = {"flowers:mushroom_brown", "flowers:mushroom_red"}
 	end
@@ -92,10 +93,10 @@ mobs:alias_mob("mobs:pumba", "mobs_animal:pumba")
 
 -- raw porkchop
 
-minetest.register_craftitem(":mobs:pork_raw", {
+core.register_craftitem(":mobs:pork_raw", {
 	description = S("Raw Porkchop"),
 	inventory_image = "mobs_pork_raw.png",
-	on_use = minetest.item_eat(4),
+	on_use = core.item_eat(4),
 	groups = {food_meat_raw = 1, food_pork_raw = 1}
 })
 
@@ -103,16 +104,16 @@ mobs.add_eatable("mobs:pork_raw", 4)
 
 -- cooked porkchop and recipe
 
-minetest.register_craftitem(":mobs:pork_cooked", {
+core.register_craftitem(":mobs:pork_cooked", {
 	description = S("Cooked Porkchop"),
 	inventory_image = "mobs_pork_cooked.png",
-	on_use = minetest.item_eat(8),
+	on_use = core.item_eat(8),
 	groups = {food_meat = 1, food_pork = 1}
 })
 
 mobs.add_eatable("mobs:pork_cooked", 8)
 
-minetest.register_craft({
+core.register_craft({
 	type = "cooking",
 	output = "mobs:pork_cooked",
 	recipe = "mobs:pork_raw",

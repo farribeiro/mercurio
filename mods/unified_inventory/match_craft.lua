@@ -7,7 +7,7 @@ Retrieve items from inventory lists and calculate their total count.
 Return a table of "item name" - "total count" pairs.
 
 Arguments:
-	inv: minetest inventory reference
+	inv: InvRef
 	lists: names of inventory lists to use
 
 Example usage:
@@ -26,14 +26,10 @@ Example output:
 function unified_inventory.count_items(inv, lists)
 	local counts = {}
 
-	for i = 1, #lists do
-		local name = lists[i]
-		local size = inv:get_size(name)
-		local list = inv:get_list(name)
+	for _, listname in ipairs(lists) do
+		local items = inv:get_list(listname)
 
-		for j = 1, size do
-			local stack = list[j]
-
+		for _, stack in ipairs(items) do
 			if not stack:is_empty() then
 				local item = stack:get_name()
 				local count = stack:get_count()
@@ -55,7 +51,7 @@ if items were placed on a 3x3 grid. Also note that craft can contain
 groups of items with "group:" prefix.
 
 Arguments:
-	craft: minetest craft recipe
+	craft: Craft recipe (same as for `core.register_craft`)
 
 Example output:
 	-- Bed recipe
@@ -227,9 +223,9 @@ This function replicates the inv:remove_item function but can accept
 multiple lists.
 
 Arguments:
-	inv: minetest inventory reference
+	inv: InvRef
 	lists: names of inventory lists
-	stack: minetest item stack
+	stack: ItemStack
 --]]
 function unified_inventory.remove_item(inv, lists, stack)
 	local removed = ItemStack(nil)
@@ -256,9 +252,9 @@ This function replicates the inv:add_item function but can accept
 multiple lists.
 
 Arguments:
-	inv: minetest inventory reference
+	inv: InvRef
 	lists: names of inventory lists
-	stack: minetest item stack
+	stack: ItemStack
 --]]
 function unified_inventory.add_item(inv, lists, stack)
 	local leftover = ItemStack(stack)
@@ -279,7 +275,7 @@ Move items from source list to destination list if possible.
 Skip positions specified in exclude set.
 
 Arguments:
-	inv: minetest inventory reference
+	inv: InvRef
 	src_list: name of source list
 	dst_list: name of destination list
 	exclude: set of positions to skip
@@ -314,7 +310,7 @@ then function tries to (in that order):
 3. Drop it to the ground if nothing else is possible.
 
 Arguments:
-	player: minetest player object
+	player: ObjectRef
 	src_list: name of source list
 	dst_list: name of destination list
 	match_table: table of matched items
@@ -322,7 +318,7 @@ Arguments:
 --]]
 function unified_inventory.move_match(player, src_list, dst_list, match_table, amount)
 	local inv = player:get_inventory()
-	local item_drop = minetest.item_drop
+	local item_drop = core.item_drop
 	local src_dst_list = {src_list, dst_list}
 	local dst_src_list = {dst_list, src_list}
 
@@ -369,32 +365,32 @@ end
 --[[
 Find craft match and move matched items to the destination list.
 
-If match cannot be found or match count is smaller than the desired
-amount then do nothing.
+If match cannot be found, do nothing.
 
-If amount passed is -1 then amount is defined by match count itself.
-This is used to indicate "craft All" case.
+If the match count is smaller than the desired
+amount then do as many as possible.
+
+amount == -1 means "Craft All". Take the largest possible amount.
 
 Arguments:
-	player: minetest player object
+	player: ObjectRef
 	src_list: name of source list
 	dst_list: name of destination list
-	craft: minetest craft recipe
-	amount: desired amount of output items
+	craft: Craft recipe (same as for `core.register_craft`)
+	amount: Desired count of craft steps to match and move
 --]]
 function unified_inventory.craftguide_match_craft(player, src_list, dst_list, craft, amount)
 	local inv = player:get_inventory()
-	local src_dst_list = {src_list, dst_list}
 
-	local counts = unified_inventory.count_items(inv, src_dst_list)
+	local counts = unified_inventory.count_items(inv, {src_list, dst_list})
 	local positions = unified_inventory.count_craft_positions(craft)
 	local match_table, match_count = unified_inventory.match_items(counts, positions)
 
-	if match_table == nil or match_count < amount then
+	if not match_table then
 		return
 	end
 
-	if amount == -1 then
+	if amount == -1 or match_count < amount then
 		amount = match_count
 	end
 

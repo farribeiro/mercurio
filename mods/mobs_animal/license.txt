@@ -32,6 +32,8 @@ Mutton, Pork and Rabbit meat textures by Piezo_ under CC0
 
 mobs_panda_viking.png by Zlo under CC0
 
+mobs_bucket_milk.png under (CC BY-SA 3.0) by ElementW (edited)
+
 Models/Textures/Media by Krupnov Pavel (WTFPL)
   mobs_rat.b3d
   mobs_rat.png

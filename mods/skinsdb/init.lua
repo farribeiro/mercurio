@@ -4,9 +4,24 @@
 -- Rework 2017 by bell07
 -- License: GPLv3
 
+if not core.has_feature({
+    dynamic_add_media_startup = true,
+    dynamic_add_media_filepath = true,
+}) then
+	error("Skinsdb requires Luanti 5.9.0 or newer, please update!")
+end
+
 skins = {}
 skins.modpath = minetest.get_modpath(minetest.get_current_modname())
 skins.default = "character"
+
+local storage_path = core.settings:get("skins.storage_path") or "@MODDATA"
+storage_path = storage_path:gsub("^@MODDATA", core.get_mod_data_path())
+storage_path = storage_path:gsub("^@WORLD", core.get_worldpath())
+skins.storage_path = storage_path
+
+core.mkdir(skins.storage_path.."/textures")
+core.mkdir(skins.storage_path.."/meta")
 
 dofile(skins.modpath.."/skin_meta_api.lua")
 dofile(skins.modpath.."/api.lua")
@@ -22,12 +37,10 @@ if minetest.get_modpath("sfinv") then
 	dofile(skins.modpath.."/sfinv_page.lua")
 end
 
--- ie.loadfile does not exist?
-skins.ie = minetest.request_insecure_environment()
-skins.http = minetest.request_http_api()
-dofile(skins.modpath.."/skins_updater.lua")
-skins.ie = nil
-skins.http = nil
+do
+	local http = minetest.request_http_api()
+	assert(loadfile(skins.modpath.."/skins_updater.lua"))(http)
+end
 
 -- 3d_armor compatibility
 if minetest.global_exists("armor") then
@@ -72,6 +85,7 @@ minetest.register_on_shutdown(function()
 	end
 end)
 
+-- See also: 3d_armor/init.lua
 player_api.register_model("skinsdb_3d_armor_character_5.b3d", {
 	animation_speed = 30,
 	textures = {
@@ -82,16 +96,21 @@ player_api.register_model("skinsdb_3d_armor_character_5.b3d", {
 	},
 	animations = {
 		stand = {x=0, y=79},
-		lay = {x=162, y=166},
+		lay = {x=162, y=166, eye_height = 0.3, override_local = true,
+			collisionbox = {-0.6, 0.0, -0.6, 0.6, 0.3, 0.6}},
 		walk = {x=168, y=187},
 		mine = {x=189, y=198},
 		walk_mine = {x=200, y=219},
-		sit = {x=81, y=160},
+		sit = {x=81, y=160, eye_height = 0.8, override_local = true,
+			collisionbox = {-0.3, 0.0, -0.3, 0.3, 1.0, 0.3}},
 		-- compatibility w/ the emote mod
 		wave = {x = 192, y = 196, override_local = true},
 		point = {x = 196, y = 196, override_local = true},
 		freeze = {x = 205, y = 205, override_local = true},
 	},
+	collisionbox = {-0.3, 0.0, -0.3, 0.3, 1.7, 0.3},
+	-- stepheight: use default
+	eye_height = 1.47,
 })
 
 -- Register default character.png if not part of this mod

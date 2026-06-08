@@ -1,4 +1,4 @@
-local S = minetest.get_translator("homedecor_seating")
+local S = core.get_translator("homedecor_seating")
 local armchair_cbox = {
 	type = "fixed",
 	fixed = {
@@ -7,7 +7,7 @@ local armchair_cbox = {
 	}
 }
 
-minetest.register_node(":lrfurn:armchair", {
+core.register_node(":lrfurn:armchair", {
 	description = S("Armchair"),
 	drawtype = "mesh",
 	mesh = "lrfurn_armchair.obj",
@@ -29,7 +29,7 @@ minetest.register_node(":lrfurn:armchair", {
 	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		unifieddyes.fix_rotation_nsew(pos, placer, itemstack, pointed_thing)
 	end,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	on_rotate = unifieddyes.fix_after_screwdriver_nsew,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		return lrfurn.sit(pos, node, clicker, itemstack, pointed_thing, 1)
@@ -57,7 +57,7 @@ homedecor.register("armchair", {
 	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		unifieddyes.fix_rotation_nsew(pos, placer, itemstack, pointed_thing)
 	end,
-	on_dig = unifieddyes.on_dig,
+	preserve_metadata = unifieddyes.preserve_metadata,
 	on_rotate = unifieddyes.fix_after_screwdriver_nsew,
 	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 		return lrfurn.sit(pos, node, clicker, itemstack, pointed_thing, 1)
@@ -68,7 +68,7 @@ homedecor.register("armchair", {
 
 -- crafts
 
-minetest.register_craft({
+core.register_craft({
 	output = "lrfurn:armchair",
 	recipe = {
 		{"wool:white", "", "", },
@@ -77,7 +77,7 @@ minetest.register_craft({
 	}
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "lrfurn:armchair",
 	recipe = {
 		{"wool:white", "", "", },
@@ -97,7 +97,7 @@ unifieddyes.register_color_craft({
 	}
 })
 
-minetest.register_craft({
+core.register_craft({
 	output = "homedecor:armchair 2",
 	recipe = {
 	{ homedecor.materials.wool_white,""},
@@ -117,13 +117,13 @@ unifieddyes.register_color_craft({
 	}
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "fuel",
 	recipe = "homedecor:armchair",
 	burntime = 30,
 })
 
-minetest.register_alias('armchair', 'homedecor:armchair')
+core.register_alias('armchair', 'homedecor:armchair')
 
 -- convert old static nodes to param2 color
 
@@ -133,7 +133,7 @@ for _, color in ipairs(lrfurn.colors) do
 	table.insert(lrfurn.old_static_armchairs, "lrfurn:armchair_"..color)
 end
 
-minetest.register_lbm({
+core.register_lbm({
 	name = ":lrfurn:convert_armchairs",
 	label = "Convert lrfurn armchairs to use param2 color",
 	run_at_every_load = false,
@@ -168,12 +168,12 @@ minetest.register_lbm({
 
 		local param2 = paletteidx + new_fdir
 
-		minetest.set_node(pos, { name = "lrfurn:armchair", param2 = param2 })
-		local meta = minetest.get_meta(pos)
+		core.set_node(pos, { name = "lrfurn:armchair", param2 = param2 })
+		local meta = core.get_meta(pos)
 		meta:set_string("dye", "unifieddyes:"..color)
 	end
 })
 
-if minetest.settings:get("log_mods") then
-	minetest.log("action", "[lrfurn/armchairs] Loaded!")
+if core.settings:get("log_mods") then
+	core.log("action", "[lrfurn/armchairs] Loaded!")
 end

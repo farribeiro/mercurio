@@ -1,7 +1,7 @@
 
 -- translation and custom land guard types
 
-local S = minetest.get_translator("mobs_monster")
+local S = core.get_translator("mobs_monster")
 
 local guard_types = {
 
@@ -33,19 +33,20 @@ local guard_types = {
 -- Land Guard
 
 mobs:register_mob("mobs_monster:land_guard", {
+	description = S("Land Guard"),
 	type = "monster",
 	passive = false,
 	attack_type = "dogfight",
 	group_attack = true,
 	reach = 3,
-	damage = 15,
+	damage = 12,
 	hp_min = 30,
 	hp_max = 65,
 	armor = 50,
 	collisionbox = {-0.5, -1.01, -0.5, 0.5, 1.6, 0.5},
 	visual_size = {x = 1, y = 1},
 	visual = "mesh",
-	mesh = "mobs_dungeon_master.b3d",
+	mesh = "mobs_dungeon_master.b3d", glow = 1,
 	textures = {
 		{"mobs_land_guard.png"},
 		{"mobs_land_guard2.png"},
@@ -55,8 +56,7 @@ mobs:register_mob("mobs_monster:land_guard", {
 	sounds = {random = "mobs_dungeonmaster"},
 	walk_velocity = 1.5,
 	run_velocity = 3.4,
-	jump = true,
-	jump_height = 2.0,
+	jump_height = 2,
 	floats = 0,
 	view_range = 15,
 	drops = {
@@ -71,6 +71,7 @@ mobs:register_mob("mobs_monster:land_guard", {
 	animation = {
 		stand_start = 0, stand_end = 19,
 		walk_start = 20, walk_end = 35,
+		run_start = 20, run_end = 35, run_speed = 40,
 		punch_start = 36, punch_end = 48,
 		speed_normal = 15, speed_run = 20,
 	},
@@ -85,7 +86,7 @@ mobs:register_mob("mobs_monster:land_guard", {
 
 			tmp = guard_types[n]
 
-			if minetest.find_node_near(pos, 1, tmp.nodes) then
+			if core.find_node_near(pos, 1, tmp.nodes) then
 
 				self.base_texture = { tmp.skins[math.random(#tmp.skins)] }
 				self.object:set_properties({textures = self.base_texture})
@@ -93,7 +94,7 @@ mobs:register_mob("mobs_monster:land_guard", {
 
 				if tmp.drops then self.drops = tmp.drops end
 
-				return true
+				break
 			end
 		end
 

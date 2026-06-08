@@ -1,13 +1,19 @@
+unused_args = false
+max_line_length = 111
 
 read_globals = {
+	"dump",
+
+	"core",
 	"vector",
-	"screwdriver",
-	"minetest",
+	"ItemStack",
+	"VoxelArea",
+
 	"default",
 	"pipeworks",
-	"dump",
-	"VoxelArea",
-	"ItemStack",
+	"screwdriver",
+
+	table = { fields = { "copy" } },
 }
 
 globals = {

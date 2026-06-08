@@ -37,7 +37,6 @@ local dragondef = {
 	},
 	walk_velocity = 3,
 	run_velocity = 5,
-	jump = true,
 	fly = true,
 	fly_in = {"air","default:water_source","default:water_flowing"},
 	drops = {
@@ -74,6 +73,6 @@ mobs:register_mob("dmobs:dragon3", dmobs.deepclone(dragondef))
 dragondef.type = "npc"
 dragondef.attacks_monsters = true
 dragondef.on_rightclick = dmobs.dragon.ride
-dragondef.do_custom = dmobs.dragon.do_custom
+dragondef.do_custom = dmobs.dragon.step_custom
 
 mobs:register_mob("dmobs:dragon_green", dmobs.deepclone(dragondef))

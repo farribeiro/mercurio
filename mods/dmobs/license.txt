@@ -26,7 +26,6 @@ CC BY-SA 3.0 UNPORTED. Created by D00Med except where an author is listed
 
 Roar.ogg - CC BY 3.0 Mike Koenig - http://soundbible.com/1165-Dinosaur-Roar.html
 Velociraptor.ogg - CC BY 3.0 snottyboi - http://soundbible.com/1373-Velociraptor-Call.html
-whale_1.ogg - CC0 Public Domain - https://en.wikipedia.org/wiki/File:Humpbackwhale2.ogg
 mobs_pig.ogg - from mobs_animal by TenPlus1 (MIT)
 dmobs_chirrup.ogg - CC BY SA 3.0 taikedz
 wasp.ogg - Public Domain
@@ -36,6 +35,10 @@ dmobs_panda.png - CC BY SA 3.0 2016 D00Med & 2021 Poikilos
 * dmobs_wind.ogg - CC-BY 3.0 : https://freesound.org/people/Pedaling%20Prince/sounds/338952/
 * dmobs_poison.ogg - CC-BY 3.0 : https://freesound.org/people/qubodup/sounds/182789/
 * dmobs_wave.ogg - CC-BY 3.0 : https://freesound.org/people/Kayyy/sounds/61011/
+
+* whale.ogg - Content license : https://pixabay.com/sound-effects/humpback-whale-382727/
+* whale-death.ogg - Content license : https://pixabay.com/sound-effects/whale-song-382729/
+* whale.0.ogg - Content license : https://pixabay.com/sound-effects/whale-sound-type-1-235995/
 
 
 --License of lib_mount:

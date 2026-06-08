@@ -1,5 +1,5 @@
-if minetest.get_modpath("default") then
-	minetest.register_craft({
+if core.get_modpath("default") then
+	core.register_craft({
 		output = "currency:safe",
 		recipe = {
 			{"default:steel_ingot", "default:steel_ingot",
@@ -11,7 +11,7 @@ if minetest.get_modpath("default") then
 		}
 	})
 
-	minetest.register_craft({
+	core.register_craft({
 		output = "currency:shop",
 		recipe = {
 			{"default:sign_wall"},
@@ -19,7 +19,7 @@ if minetest.get_modpath("default") then
 		}
 	})
 
-	minetest.register_craft({
+	core.register_craft({
 		output = "currency:barter",
 		recipe = {
 			{"default:sign_wall"},
@@ -28,7 +28,7 @@ if minetest.get_modpath("default") then
 	})
 end
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_cent_10",
 	recipe = {
@@ -37,13 +37,13 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_cent_5 2",
 	recipe = {"currency:minegeld_cent_10"},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_cent_25",
 	recipe = {
@@ -55,13 +55,13 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_cent_5 5",
 	recipe = {"currency:minegeld_cent_25"},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld",
 	recipe = {
@@ -72,13 +72,13 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_cent_25 4",
 	recipe = {"currency:minegeld"},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_5",
 	recipe = {
@@ -90,13 +90,13 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld 5",
 	recipe = {"currency:minegeld_5"},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_10",
 	recipe = {
@@ -105,19 +105,19 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_5 2",
 	recipe = {"currency:minegeld_10"},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_10 5",
 	recipe = {"currency:minegeld_50"},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_50",
 	recipe = {
@@ -129,7 +129,7 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_100",
 	recipe = {
@@ -138,13 +138,13 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_50 2",
 	recipe = {"currency:minegeld_100" },
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "shapeless",
 	output = "currency:minegeld_bundle",
 	recipe = {
@@ -160,7 +160,7 @@ minetest.register_craft({
 	},
 })
 
-minetest.register_craft({
+core.register_craft({
 	type = "fuel",
 	recipe = "currency:minegeld_bundle",
 	burntime = 1,

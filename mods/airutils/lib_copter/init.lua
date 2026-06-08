@@ -1,8 +1,2 @@
-
-
-dofile(minetest.get_modpath("airutils") .. DIR_DELIM .. "lib_copter" .. DIR_DELIM .. "control.lua")
-dofile(minetest.get_modpath("airutils") .. DIR_DELIM .. "lib_copter" .. DIR_DELIM .. "entities.lua")
-
-
-
-
+dofile(core.get_modpath("airutils") .. DIR_DELIM .. "lib_copter" .. DIR_DELIM .. "control.lua")
+dofile(core.get_modpath("airutils") .. DIR_DELIM .. "lib_copter" .. DIR_DELIM .. "entities.lua")

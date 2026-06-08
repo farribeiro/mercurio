@@ -1,5 +1,5 @@
 
-local S = minetest.get_translator("mobs_monster")
+local S = core.get_translator("mobs_monster")
 
 -- custom dungeon master types
 
@@ -16,6 +16,7 @@ local master_types = {
 -- Dungeon Master by PilzAdam
 
 mobs:register_mob("mobs_monster:dungeon_master", {
+	description = S("Dungeon Master"),
 	type = "monster",
 	passive = false,
 	damage = 6,
@@ -27,17 +28,18 @@ mobs:register_mob("mobs_monster:dungeon_master", {
 	shoot_interval = 2.2,
 	arrow = "mobs_monster:fireball",
 	friendly_fire = false,
-	shoot_offset = 1,
+	shoot_offset = 1.4,
 	hp_min = 42,
 	hp_max = 75,
 	armor = 60,
-	collisionbox = {-0.7, -1, -0.7, 0.7, 1.6, 0.7},
+	collisionbox = {-0.5, -1, -0.5, 0.5, 1.6, 0.5},
 	visual = "mesh",
-	mesh = "mobs_dungeon_master.b3d",
+	mesh = "mobs_dungeon_master.b3d", glow = 1,
 	textures = {
 		{"mobs_dungeon_master.png"},
 		{"mobs_dungeon_master2.png"},
-		{"mobs_dungeon_master3.png"}
+		{"mobs_dungeon_master3.png"},
+		{"mobs_dungeon_master4.png"}
 	},
 	makes_footstep_sound = true,
 	sounds = {
@@ -46,7 +48,6 @@ mobs:register_mob("mobs_monster:dungeon_master", {
 	},
 	walk_velocity = 1,
 	run_velocity = 3,
-	jump = true,
 	view_range = 15,
 	drops = {
 		{name = "default:mese_crystal_fragment", chance = 1, min = 0, max = 2},
@@ -62,6 +63,7 @@ mobs:register_mob("mobs_monster:dungeon_master", {
 	animation = {
 		stand_start = 0, stand_end = 19,
 		walk_start = 20, walk_end = 35,
+		run_start = 20, run_end = 35, run_speed = 40,
 		punch_start = 36, punch_end = 48,
 		shoot_start = 36, shoot_end = 48,
 		speed_normal = 15, speed_run = 15
@@ -77,14 +79,12 @@ mobs:register_mob("mobs_monster:dungeon_master", {
 
 			tmp = master_types[n]
 
-			if minetest.find_node_near(pos, 1, tmp.nodes) then
+			if core.find_node_near(pos, 1, tmp.nodes) then
 
 				self.base_texture = tmp.skins
 				self.object:set_properties({textures = tmp.skins})
 
-				if tmp.drops then self.drops = tmp.drops end
-
-				return true
+				break
 			end
 		end
 
@@ -121,7 +121,7 @@ mobs:register_arrow("mobs_monster:fireball", {
 	visual = "sprite",
 	visual_size = {x = 1, y = 1},
 	textures = {"mobs_fireball.png"},
-	collisionbox = {-0.1, -0.1, -0.1, 0.1, 0.1, 0.1},
+	collisionbox = {-0.3, -0.3, -0.3, 0.3, 0.3, 0.3},
 	velocity = 7,
 	tail = 1,
 	tail_texture = "mobs_fireball.png",
@@ -140,7 +140,7 @@ mobs:register_arrow("mobs_monster:fireball", {
 		if hitter and hitter:is_player() and tool_capabilities and dir then
 
 			local damage = tool_capabilities.damage_groups and
-				tool_capabilities.damage_groups.fleshy or 1
+					tool_capabilities.damage_groups.fleshy or 1
 
 			local tmp = tflp / (tool_capabilities.full_punch_interval or 1.4)
 
@@ -158,24 +158,24 @@ mobs:register_arrow("mobs_monster:fireball", {
 	-- direct hit, no fire... just plenty of pain
 	hit_player = function(self, player)
 
-		player:punch(self.object, 1.0, {
-			full_punch_interval = 1.0,
-			damage_groups = {fleshy = 8}
-		}, nil)
+		player:punch(self.object, 1.0,
+				{full_punch_interval = 1.0, damage_groups = {fleshy = 8}}, nil)
 	end,
 
 	hit_mob = function(self, player)
 
-		player:punch(self.object, 1.0, {
-			full_punch_interval = 1.0,
-			damage_groups = {fleshy = 8}
-		}, nil)
+		player:punch(self.object, 1.0,
+				{full_punch_interval = 1.0, damage_groups = {fleshy = 8}}, nil)
+	end,
+
+	hit_object = function(self, player)
+		mobs:boom(self, pos, 2)
 	end,
 
 	-- node hit
 	hit_node = function(self, pos, node)
-		mobs:boom(self, pos, 1)
+		mobs:boom(self, pos, 2)
 	end
 })
 
---minetest.override_item("default:obsidian", {on_blast = function() end})
+--core.override_item("default:obsidian", {on_blast = function() end})

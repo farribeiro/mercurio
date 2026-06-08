@@ -50,11 +50,12 @@ if farming_enabled then
 			local item_string = name:sub(1, #name - 2)
 			local item_name = item_string:split(":")[2]
 			local growth_stage = tonumber(name:sub(-1)) or 1
+			local groups = def.groups or {}
 			if farming.registered_plants[item_string]
 			or farming.registered_plants[item_name] then
-				def.groups.crop = growth_stage
+				groups.crop = growth_stage
 			end
-			minetest.register_node(":" .. name, def)
+			minetest.override_item(name, {groups = groups})
 		end
 	end)
 end
@@ -591,12 +592,14 @@ function animalia.action_melee(self, target)
 		if stage == 2
 		and dist < mob.width + 1 then
 			mob:punch_target(target)
-			local knockback = minetest.calculate_knockback(
-				target, mob.object, 1.0,
-				{damage_groups = {fleshy = mob.damage}},
-				dir, 2.0, mob.damage
-			)
-			target:add_velocity({x = dir.x * knockback, y = dir.y * knockback, z = dir.z * knockback})
+			if target:get_pos() then -- target may have died and disappeared
+				local knockback = minetest.calculate_knockback(
+					target, mob.object, 1.0,
+					{damage_groups = {fleshy = mob.damage}},
+					dir, 2.0, mob.damage
+				)
+				target:add_velocity({x = dir.x * knockback, y = dir.y * knockback, z = dir.z * knockback})
+			end
 
 			stage = 3
 		end
@@ -756,7 +759,7 @@ creatura.register_utility("animalia:basic_idle", function(self, timeout, anim)
 	local init = false
 	local function func(mob)
 		if not init then
-			creatura.action_idle(mob, timeout, anim)
+			creatura.action_idle(mob, timer, anim)
 		end
 		timer = timer - mob.dtime
 		if timer <= 0 then
@@ -1594,12 +1597,14 @@ local function take_food_from_chest(self, pos)
 		for i, stack in ipairs(inv:get_list("main")) do
 			local item_name = stack:get_name()
 			local def = minetest.registered_items[item_name]
-			for group in pairs(def.groups) do
-				if group:match("food_") then
-					stack:take_item()
-					inv:set_stack("main", i, stack)
-					animalia.add_food_particle(self, item_name)
-					return true
+			if def and def.groups then
+				for group in pairs(def.groups) do
+					if group:match("food_") then
+						stack:take_item()
+						inv:set_stack("main", i, stack)
+						animalia.add_food_particle(self, item_name)
+						return true
+					end
 				end
 			end
 		end

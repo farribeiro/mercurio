@@ -1,7 +1,7 @@
 
 -- add lucky blocks
 
-if minetest.get_modpath("lucky_block") then
+if core.get_modpath("lucky_block") then
 
 
 
