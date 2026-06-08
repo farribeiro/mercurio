@@ -55,7 +55,7 @@ local def = {
 	drawtype = "plantlike",
 	tiles = {"farming_sunflower_1.png"},
 	paramtype = "light",
-	sunlight_propagates = true, minlight = 14,
+	sunlight_propagates = true, minlight = 13,
 	walkable = false,
 	buildable_to = true,
 	drop = "",
@@ -123,7 +123,7 @@ core.register_node("farming:sunflower_8", table.copy(def))
 farming.registered_plants["farming:sunflower"] = {
 	crop = "farming:sunflower",
 	seed = "farming:seed_sunflower",
-	minlight = 14,
+	minlight = 13,
 	maxlight = farming.max_light,
 	steps = 8
 }

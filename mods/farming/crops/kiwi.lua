@@ -11,7 +11,7 @@ core.register_node("farming:kiwi_vine", {
 	description = S("Kiwi Vine"),
 	tiles = {"x_farming_kiwi_wood.png"},
 	sunlight_propagates = true,
-	groups = {flammable = 3, choppy = 2, oddly_breakable_by_hand = 1},
+	groups = {flammable = 3, choppy = 2, oddly_breakable_by_hand = 1, vine = 1},
 	sounds = farming.node_sound_wood_defaults(),
 	paramtype = "light",
 	paramtype2 = "facedir",
